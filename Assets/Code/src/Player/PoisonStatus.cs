@@ -12,7 +12,7 @@ public struct PoisonComponentData : IComponentData {
 public class PoisonSystem : SystemBase {
   protected override void OnUpdate() {
     float deltaTime = Time.fixedDeltaTime;
-    Entities.ForEach((ref PlayerComponent player, in PoisonComponentData poison) => {
+    Entities.WithBurst().ForEach((ref PlayerComponent player, in PoisonComponentData poison) => {
       player.Damage += deltaTime * poison.DamagePerSecond;
     }).Schedule();
   }

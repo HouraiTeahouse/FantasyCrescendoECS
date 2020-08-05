@@ -164,7 +164,8 @@ PlayerSettings:
   resolutionScalingMode: 0
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1
-  applicationIdentifier: {}
+  applicationIdentifier:
+    Standalone: com.houraiteahouse.FantasyCrescendo
   buildNumber: {}
   AndroidBundleVersionCode: 1
   AndroidMinSdkVersion: 19
@@ -582,13 +583,13 @@ PlayerSettings:
   il2cppCompilerConfiguration: {}
   managedStrippingLevel: {}
   incrementalIl2cppBuild: {}
-  allowUnsafeCode: 0
+  allowUnsafeCode: 1
   additionalIl2CppArgs: 
   scriptingRuntimeVersion: 1
-  gcIncremental: 0
+  gcIncremental: 1
   gcWBarrierValidation: 0
   apiCompatibilityLevelPerPlatform:
-    Standalone: 3
+    Standalone: 6
     WebGL: 3
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
