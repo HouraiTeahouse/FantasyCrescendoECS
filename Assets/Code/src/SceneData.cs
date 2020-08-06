@@ -3,7 +3,7 @@ using UnityEngine.AddressableAssets;
 
 namespace HouraiTeahouse.FantasyCrescendo {
 
-[CreateAssetMenu(menuName = "Fantasy Crescendo/Scene (Stage)")]
+[CreateAssetMenu(menuName = "Fantasy Crescendo/SceneData (Stage)")]
 public class SceneData : GameData {
 
   public SceneType Type = SceneType.Stage;

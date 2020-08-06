@@ -1,10 +1,9 @@
 using System;
 using System.Buffers;
+using Unity.Assertions;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities.Serialization;
-using UnityEngine;
-using UnityEngine.Assertions;
 
 namespace HouraiTeahouse.FantasyCrescendo.Utils {
 
@@ -149,8 +148,8 @@ public unsafe class DynamicBinaryWriter : BinaryBuffer, BinaryWriter {
     _end = buffer + capacity;
     _start = buffer;
     Assert.IsTrue(IsValid);
-    Assert.IsTrue(capacity == Capacity);
-    Assert.IsTrue(size == Size);
+    Assert.AreEqual(capacity, Capacity);
+    Assert.AreEqual(size, Size);
   }
 
   void Init(int capacity) {

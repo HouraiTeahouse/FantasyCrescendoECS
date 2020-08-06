@@ -12,6 +12,9 @@ public class Player : MonoBehaviour, IConvertGameObjectToEntity {
     entityManager.AddComponent(entity, typeof(PlayerComponent));
     entityManager.AddComponent(entity, typeof(PlayerConfig));
     entityManager.AddComponent(entity, typeof(PlayerInputComponent));
+    entityManager.AddComponentData(entity, new TimeToLive {
+      FramesRemaining = 1200
+    });
   }
 
 }
