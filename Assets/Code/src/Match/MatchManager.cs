@@ -1,17 +1,27 @@
-﻿using HouraiTeahouse.FantasyCrescendo.Utils;
+﻿using HouraiTeahouse.Attributes;
+using HouraiTeahouse.FantasyCrescendo.Utils;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Unity.Core;
 using Unity.Entities;
 using Unity.Entities.Serialization;
 
-namespace HouraiTeahouse.FantasyCrescendo {
+namespace HouraiTeahouse.FantasyCrescendo.Matches {
 
 public class MatchManager : MonoBehaviour {
 
   World _world;
   SimulationSystemGroup _simulation;
   DynamicBinaryWriter _stateWriter;
+
+#pragma warning disable 0649
+  [SerializeField, Tag] string _spawnPoints;
+  [SerializeField, Tag] string _respawnPoints;
+  [SerializeField] MatchConfig _config;
+#pragma warning restore 0649
 
   void Awake() {
     _stateWriter = new DynamicBinaryWriter(1024);
@@ -38,6 +48,32 @@ public class MatchManager : MonoBehaviour {
   void OnDestroy() {
     _stateWriter?.Dispose();
   }
+
+  Vector3[] GetPointsFromTag(string tag) {
+    if (tag == null) return new Vector3[0];
+    var gameObjects = GameObject.FindGameObjectsWithTag(tag);
+    var seenNames = new HashSet<string>();
+    foreach (var go in gameObjects) {
+      if  (seenNames.Contains(go.name)) {
+        throw new InvalidOperationException($"There are multiple objects of with the name {go.name}. This will lead to non-deterministic behaivor!");
+      }
+      seenNames.Add(go.name);
+    }
+    return gameObjects.OrderBy(go => go.name).Select(go => go.transform.position).ToArray();
+  }
+
+#if UNITY_EDITOR
+  void OnDrawGizmos() {
+    Gizmos.color = Color.blue;
+    foreach (var spawnPoint in GetPointsFromTag(_spawnPoints)) {
+      Gizmos.DrawWireSphere(spawnPoint, 0.25f);
+    }
+    Gizmos.color = Color.yellow;
+    foreach (var respawnPoint in GetPointsFromTag(_respawnPoints)) {
+      Gizmos.DrawWireSphere(respawnPoint, 0.25f);
+    }
+  }
+#endif
 
 }
 
