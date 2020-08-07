@@ -2,7 +2,7 @@
 using HouraiTeahouse;
 using Unity.Entities;
 
-namespace HouraiTeahouse.FantasyCrescendo.Players {
+namespace HouraiTeahouse.FantasyCrescendo.Matches {
 
 /// <summary>
 /// A data object for configuring a single player within a multiplayer match.

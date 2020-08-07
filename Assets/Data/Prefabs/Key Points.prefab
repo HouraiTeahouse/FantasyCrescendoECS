@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6168175680417116551}
   m_Layer: 0
   m_Name: Respawn Point 2
-  m_TagString: Respawn Point
+  m_TagString: Respawn
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -41,7 +41,7 @@ GameObject:
   - component: {fileID: 7156078930423532585}
   m_Layer: 0
   m_Name: Respawn Point 1
-  m_TagString: Respawn Point
+  m_TagString: Respawn
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -257,7 +257,7 @@ GameObject:
   - component: {fileID: 8047763939485456849}
   m_Layer: 0
   m_Name: Respawn Point 3
-  m_TagString: Respawn Point
+  m_TagString: Respawn
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -321,7 +321,7 @@ GameObject:
   - component: {fileID: 3686232404504728434}
   m_Layer: 0
   m_Name: Respawn Point 4
-  m_TagString: Respawn Point
+  m_TagString: Respawn
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

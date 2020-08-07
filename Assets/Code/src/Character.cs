@@ -4,7 +4,7 @@ using UnityEngine.AddressableAssets;
 using HouraiTeahouse.Attributes;
 using HouraiTeahouse.FantasyCrescendo.Utils;
 
-namespace HouraiTeahouse.FantasyCrescendo.Players {
+namespace HouraiTeahouse.FantasyCrescendo {
 
 /// <summary>
 /// A data object representing a playable character.
@@ -48,6 +48,10 @@ public class Character : GameData {
     Icon.ReleaseAsset();
     HomeStage.ReleaseAsset();
     VictoryTheme.ReleaseAsset();
+    if (Palletes == null) return;
+    foreach (var pallete in Palletes) {
+      pallete.Unload();
+    }
   }
 
   public override string ToString() => $"Character ({name})";

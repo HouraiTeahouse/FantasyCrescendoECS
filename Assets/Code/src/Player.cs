@@ -1,6 +1,7 @@
 ﻿using System;
 using Unity.Entities;
 using UnityEngine;
+using HouraiTeahouse.FantasyCrescendo.Matches;
 using HouraiTeahouse.FantasyCrescendo.Players;
 
 namespace HouraiTeahouse.FantasyCrescendo.Authoring {

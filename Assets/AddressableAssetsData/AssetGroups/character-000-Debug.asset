@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: character-000-Debug
+  m_EditorClassIdentifier: 
+  m_GroupName: character-000-Debug
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 816414b4622cb9a43b45b116ccf8838a
+  m_SerializeEntries:
+  - m_GUID: 1a966b5a1e7b757448aa1e5ba1b18ed6
+    m_Address: Assets/Data/Characters/000_Debug/Debug_Character_3.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    m_MainAsset: {fileID: 1413820065312423927, guid: 1a966b5a1e7b757448aa1e5ba1b18ed6,
+      type: 3}
+    m_TargetAsset: {fileID: 1413820065312423927, guid: 1a966b5a1e7b757448aa1e5ba1b18ed6,
+      type: 3}
+  - m_GUID: 2829bbf4dfddc0048bbe504c86202d53
+    m_Address: Assets/Data/Characters/000_Debug/Debug_Character_4.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    m_MainAsset: {fileID: 8276187069544215597, guid: 2829bbf4dfddc0048bbe504c86202d53,
+      type: 3}
+    m_TargetAsset: {fileID: 8276187069544215597, guid: 2829bbf4dfddc0048bbe504c86202d53,
+      type: 3}
+  - m_GUID: 6105134d1ca5ee64da3fe965a6583c49
+    m_Address: Assets/Data/Characters/000_Debug/Debug.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Character
+    m_MainAsset: {fileID: 11400000, guid: 6105134d1ca5ee64da3fe965a6583c49, type: 2}
+    m_TargetAsset: {fileID: 11400000, guid: 6105134d1ca5ee64da3fe965a6583c49, type: 2}
+  - m_GUID: 97dc40ad494bbfc4e87d07a4ed5ac570
+    m_Address: Assets/Data/Characters/000_Debug/Debug_Character_2.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    m_MainAsset: {fileID: 179798011381033370, guid: 97dc40ad494bbfc4e87d07a4ed5ac570,
+      type: 3}
+    m_TargetAsset: {fileID: 179798011381033370, guid: 97dc40ad494bbfc4e87d07a4ed5ac570,
+      type: 3}
+  - m_GUID: 9956e579508b26d46aeff9a9e81e47c6
+    m_Address: Assets/Data/Characters/000_Debug/Debug_Character_1.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    m_MainAsset: {fileID: 5298789360088054782, guid: 9956e579508b26d46aeff9a9e81e47c6,
+      type: 3}
+    m_TargetAsset: {fileID: 5298789360088054782, guid: 9956e579508b26d46aeff9a9e81e47c6,
+      type: 3}
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 1801368299d5cb1498033e00355577f4, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 37c1e68fe39170a4f8bb0a3e6f765726, type: 2}
+    - {fileID: 11400000, guid: 5650555924703a24689dd3e8a9b8ba76, type: 2}

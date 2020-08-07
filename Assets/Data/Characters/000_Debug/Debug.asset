@@ -32,25 +32,25 @@ MonoBehaviour:
       m_AssetGUID: 
       m_SubObjectName: 
     Prefab:
-      m_AssetGUID: 
+      m_AssetGUID: 9956e579508b26d46aeff9a9e81e47c6
       m_SubObjectName: 
   - Portrait:
       m_AssetGUID: 
       m_SubObjectName: 
     Prefab:
-      m_AssetGUID: 
+      m_AssetGUID: 97dc40ad494bbfc4e87d07a4ed5ac570
       m_SubObjectName: 
   - Portrait:
       m_AssetGUID: 
       m_SubObjectName: 
     Prefab:
-      m_AssetGUID: 
+      m_AssetGUID: 1a966b5a1e7b757448aa1e5ba1b18ed6
       m_SubObjectName: 
   - Portrait:
       m_AssetGUID: 
       m_SubObjectName: 
     Prefab:
-      m_AssetGUID: 
+      m_AssetGUID: 2829bbf4dfddc0048bbe504c86202d53
       m_SubObjectName: 
   PortraitCropCenter: {x: 0, y: 0}
   PortraitCropSize: 0

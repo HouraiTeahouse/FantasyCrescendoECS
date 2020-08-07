@@ -3,6 +3,7 @@ using HouraiTeahouse.FantasyCrescendo.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Unity.Core;
@@ -29,6 +30,7 @@ public class MatchManager : MonoBehaviour {
     _simulation = _world.GetOrCreateSystem<SimulationSystemGroup>();
     _simulation.Enabled = false;
     _simulation.SortSystems();
+    SpawnPlayers();
   }
 
   void FixedUpdate() {
@@ -47,6 +49,30 @@ public class MatchManager : MonoBehaviour {
 
   void OnDestroy() {
     _stateWriter?.Dispose();
+  }
+
+  async void SpawnPlayers() {
+    await DataLoader.WaitUntilLoaded();
+    var spawnPoints = GetPointsFromTag(_spawnPoints);
+    var tasks = new Task[_config.PlayerCount];
+    for (var i = 0; i < _config.PlayerCount; i++) {
+      Vector3 spawnPoint = spawnPoints[i % spawnPoints.Length];
+      tasks[i] = SpawnPlayer(_config[i], spawnPoint);
+    }
+    await Task.WhenAll(tasks);
+    Debug.Log("Players spawned!");
+  }
+
+  async Task SpawnPlayer(PlayerConfig config, Vector3 position) {
+    var settings = new GameObjectConversionSettings(_world, 
+                        GameObjectConversionUtility.ConversionFlags.AssignName);
+    var pallete = config.Selection.GetPallete();
+    var prefab = await pallete.Prefab.LoadAssetAsync<GameObject>().Task;
+    var player = GameObject.Instantiate(prefab, position, Quaternion.identity);
+    var entity = GameObjectConversionUtility.ConvertGameObjectHierarchy(player, settings);
+    _world.EntityManager.AddComponentData(entity, config);
+    Destroy(player);
+    Debug.Log($"Player {config.PlayerID} spawned!");
   }
 
   Vector3[] GetPointsFromTag(string tag) {

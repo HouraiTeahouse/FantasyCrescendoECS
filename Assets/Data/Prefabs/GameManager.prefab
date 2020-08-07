@@ -9,9 +9,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7016787136043872882}
+  - component: {fileID: 7334824967193499063}
+  - component: {fileID: 1336318779102892921}
   - component: {fileID: 7016787136043872881}
   m_Layer: 0
-  m_Name: MatchManager
+  m_Name: GameManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -31,6 +33,35 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7334824967193499063
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7016787136043872880}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c456241125f850143b53afd86fa1dfa3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _id: 1856898242
+  _dontDestroyOnLoad: 1
+--- !u!114 &1336318779102892921
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7016787136043872880}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0bf66e4a8bbe9a047959bb25a74424b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  LoadedLabels:
+  - m_LabelString: Character
+  - m_LabelString: Scene
 --- !u!114 &7016787136043872881
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -44,7 +75,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _spawnPoints: Spawn Point
-  _respawnPoints: Respawn Point
+  _respawnPoints: Respawn
   _config:
     StageID: 3709815314
     Stocks: 4
