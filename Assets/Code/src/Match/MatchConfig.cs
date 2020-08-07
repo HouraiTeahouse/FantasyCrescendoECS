@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+using Unity.Collections;
 using UnityEngine;
 using HouraiTeahouse.FantasyCrescendo.Players;
 
@@ -11,12 +10,10 @@ public class MatchConfig {
 
   public const int kMaxSupportedPlayers = 8;
 
-  static MatchConfig _currentConfig;
-  public static ref MatchConfig CurrentConfig => ref _currentConfig;
-
   /// <summary>
   /// The ID of the stage that the match will be played on.
   /// </summary>
+  [GameDataId(typeof(SceneData))]
   public uint StageID;
 
   /// <summary>
@@ -73,6 +70,27 @@ public class MatchConfig {
       }
       return true;
     }
+  }
+
+  /// <summary>
+  /// Creates an array that is sized to contain up to the maximum number of
+  /// supproted players.
+  /// </summary>
+  /// <typeparam name="T">the type of the array to create</typeparam>
+  /// <returns>the created managed array</returns>
+  public static T[] CreatePlayerBuffer<T>() {
+    return new T[kMaxSupportedPlayers];
+  }
+
+  /// <summary>
+  /// Creates an NativeArray that is sized to contain up to the maximum 
+  /// number of supproted players.
+  /// </summary>
+  /// <typeparam name="T">the type of the NativeArray to create</typeparam>
+  /// <returns>the created NativeArray</returns>
+  public static NativeArray<T> CreateNativePlayerBuffer<T>(Allocator allocator = Allocator.Persistent)
+                                                          where T : struct {
+    return new NativeArray<T>(kMaxSupportedPlayers, allocator);
   }
 
 }

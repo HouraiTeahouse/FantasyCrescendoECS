@@ -54,6 +54,7 @@ public struct PlayerConfig : IComponentData {
 [Serializable]
 public struct PlayerSelection {
 
+  [GameDataId(typeof(Character))]
   public uint CharacterID;            // 1-4 bytes
   public byte Pallete;                // 1 byte
   
