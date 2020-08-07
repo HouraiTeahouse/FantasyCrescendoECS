@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.houraiteahouse.config": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://upm.houraiteahouse.net"
+    },
     "com.houraiteahouse.core": {
       "version": "1.0.1",
       "depth": 0,

@@ -9,7 +9,7 @@ public class InjectInputsSystem : SystemBase {
   NativeArray<PlayerInput> _inputs;
 
   protected override void OnCreate() {
-    _inputs = new NativeArray<PlayerInput>(MatchConfig.kMaxSupportedPlayers, Allocator.Persistent);
+    _inputs = MatchConfig.CreateNativePlayerBuffer<PlayerInput>();
   }
 
   protected override void OnUpdate() {
