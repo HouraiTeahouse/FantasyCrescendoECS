@@ -24,6 +24,7 @@ public class DataLoader : MonoBehaviour {
   };
 
   async void Start() {
+    LoadingScreen.AddTask(_loading.Task);
     var labelsLoaded = 0;
     await Task.WhenAll(LoadedLabels.Select(async label => {
       var results = await Addressables.LoadAssetsAsync<UnityEngine.Object>(label.RuntimeKey, null).Task;

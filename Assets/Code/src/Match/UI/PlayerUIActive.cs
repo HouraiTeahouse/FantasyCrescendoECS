@@ -18,11 +18,7 @@ public class PlayerUIActive : MonoBehaviour, IView<PlayerUIData> {
     bool isActive = player.PlayerData.IsActive;
     if (_invert) isActive = !isActive;
     foreach (var obj in _objects) {
-      if (obj is Behaviour behaviour) {
-        behaviour.enabled = isActive;
-      } else if (obj is GameObject go) {
-        go.SetActive(isActive);
-      }
+      ObjectUtility.SetActive(obj, isActive);
     }
   }
 

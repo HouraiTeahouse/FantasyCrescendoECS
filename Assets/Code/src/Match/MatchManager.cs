@@ -30,7 +30,7 @@ public class MatchManager : MonoBehaviour {
     _simulation = _world.GetOrCreateSystem<SimulationSystemGroup>();
     _simulation.Enabled = false;
     _simulation.SortSystems();
-    SpawnPlayers();
+    LoadingScreen.AddTask(SpawnPlayers());
   }
 
   void FixedUpdate() {
@@ -51,7 +51,7 @@ public class MatchManager : MonoBehaviour {
     _stateWriter?.Dispose();
   }
 
-  async void SpawnPlayers() {
+  async Task SpawnPlayers() {
     await DataLoader.WaitUntilLoaded();
     var spawnPoints = GetPointsFromTag(_spawnPoints);
     var tasks = new Task[_config.PlayerCount];
