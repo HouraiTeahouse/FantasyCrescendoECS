@@ -12,7 +12,7 @@ public struct PlayerComponent : IComponentData {
   public bool IsFastFalling;
   public bool IsTeetering;
 
-  public uint Stocks;
+  public int Stocks;
   public float Damage;
   public int Hitstun;
   public int Hitlag;

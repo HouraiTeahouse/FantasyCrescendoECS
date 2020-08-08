@@ -71,6 +71,10 @@ public class MatchManager : MonoBehaviour {
     var player = GameObject.Instantiate(prefab, position, Quaternion.identity);
     var entity = GameObjectConversionUtility.ConvertGameObjectHierarchy(player, settings);
     _world.EntityManager.AddComponentData(entity, config);
+    _world.EntityManager.AddComponentData(entity, new PlayerComponent {
+      Stocks = (int)_config.Stocks,
+      Damage = config.DefaultDamage
+    });
     Destroy(player);
     Debug.Log($"Player {config.PlayerID} spawned!");
   }

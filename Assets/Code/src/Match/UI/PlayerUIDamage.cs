@@ -1,4 +1,4 @@
-﻿using  HouraiTeahouse.FantasyCrescendo.Core;
+﻿using HouraiTeahouse.FantasyCrescendo.Core;
 using UnityEngine;
 using TMPro;
 
@@ -28,6 +28,7 @@ public class PlayerUIDamage : MonoBehaviour, IView<PlayerUIData> {
   }
 
   void SetTextDamage(float damage) {
+    damage = Mathf.Floor(damage);
     if (damage == lastDamage) return;
     var displayDamage = Mathf.Round(damage);
     if (string.IsNullOrEmpty(Format)) {

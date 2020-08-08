@@ -10,12 +10,16 @@ namespace HouraiTeahouse.FantasyCrescendo.Matches {
 public class PlayerUIActive : MonoBehaviour, IView<PlayerUIData> {
 
 #pragma warning disable 0649
+  [SerializeField] bool UsePresence;
   [SerializeField] Object[] _objects;
   [SerializeField] bool _invert;
 #pragma warning restore 0649
 
   public void UpdateView(in PlayerUIData player) {
     bool isActive = player.PlayerData.IsActive;
+    if (UsePresence) {
+      isActive = player.IsPresent;
+    }
     if (_invert) isActive = !isActive;
     foreach (var obj in _objects) {
       ObjectUtility.SetActive(obj, isActive);
