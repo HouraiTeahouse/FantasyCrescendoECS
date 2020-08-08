@@ -18,6 +18,9 @@ public class MatchManager : MonoBehaviour {
   SimulationSystemGroup _simulation;
   DynamicBinaryWriter _stateWriter;
 
+  public static MatchManager Instance { get; private set; }
+  public bool IsMatchRunning { get; private set; }
+
 #pragma warning disable 0649
   [SerializeField, Tag] string _spawnPoints;
   [SerializeField, Tag] string _respawnPoints;
@@ -25,12 +28,17 @@ public class MatchManager : MonoBehaviour {
 #pragma warning restore 0649
 
   void Awake() {
+    Instance = this;
+
     _stateWriter = new DynamicBinaryWriter(1024);
     _world = World.DefaultGameObjectInjectionWorld;
     _simulation = _world.GetOrCreateSystem<SimulationSystemGroup>();
     _simulation.Enabled = false;
     _simulation.SortSystems();
-    LoadingScreen.AddTask(SpawnPlayers());
+
+    _config.RandomSeed = (uint)new System.Random().Next();
+
+    LoadingScreen.AddTask(StartMatch());
   }
 
   void FixedUpdate() {
@@ -49,6 +57,30 @@ public class MatchManager : MonoBehaviour {
 
   void OnDestroy() {
     _stateWriter?.Dispose();
+  }
+
+  async Task StartMatch() {
+    await Task.WhenAll(SpawnPlayers());
+    _world.EntityManager.CreateEntity(ComponentType.ReadOnly<MatchState>());
+    _world.GetExistingSystem<SimulationSystemGroup>().SetSingleton(_config.CreateInitialState());
+
+    var enabledRules = new HashSet<Type>(MakeMatchRules());
+    foreach (var system in _world.GetExistingSystem<MatchRuleSystemGroup>().Systems) {
+      system.Enabled = enabledRules.Contains(system.GetType());
+      if (system.Enabled) {
+        Debug.Log($"Enabled match rule: {system}");
+      }
+    }
+    IsMatchRunning = true;
+  }
+
+  IEnumerable<Type> MakeMatchRules() {
+    if (_config.Time > 0) {
+      yield return typeof(TimeMatchRuleSystem);
+    }
+    if (_config.Stocks > 0) {
+      yield return typeof(StockMatchRuleSystem);
+    }
   }
 
   async Task SpawnPlayers() {

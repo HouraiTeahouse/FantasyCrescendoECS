@@ -29,6 +29,11 @@ public class MatchConfig {
   public uint Time;
 
   /// <summary>
+  /// The starting random seed for the match.
+  /// </summary>
+  public uint RandomSeed;
+
+  /// <summary>
   /// Individual configurations for each participating player.
   /// </summary>
   /// <remarks>
@@ -70,6 +75,13 @@ public class MatchConfig {
       }
       return true;
     }
+  }
+
+  public MatchState CreateInitialState() {
+    return new MatchState {
+      Time = this.Time,
+      Random = new Unity.Mathematics.Random(RandomSeed)
+    };
   }
 
   /// <summary>
