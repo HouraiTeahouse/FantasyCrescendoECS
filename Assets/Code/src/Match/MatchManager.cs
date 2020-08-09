@@ -9,6 +9,7 @@ using UnityEngine.InputSystem;
 using Unity.Core;
 using Unity.Entities;
 using Unity.Entities.Serialization;
+using Unity.Transforms;
 
 namespace HouraiTeahouse.FantasyCrescendo.Matches {
 
@@ -85,6 +86,7 @@ public class MatchManager : MonoBehaviour {
 
   async Task SpawnPlayers() {
     await DataLoader.WaitUntilLoaded();
+    SetupStage();
     var spawnPoints = GetPointsFromTag(_spawnPoints);
     var tasks = new Task[_config.PlayerCount];
     for (var i = 0; i < _config.PlayerCount; i++) {
@@ -104,14 +106,28 @@ public class MatchManager : MonoBehaviour {
     var entity = GameObjectConversionUtility.ConvertGameObjectHierarchy(player, settings);
     _world.EntityManager.AddComponentData(entity, config);
     _world.EntityManager.AddComponentData(entity, new PlayerComponent {
+      RNG = new Unity.Mathematics.Random((uint)(_config.RandomSeed ^ (1 << config.PlayerID))),
       Stocks = (int)_config.Stocks,
-      Damage = config.DefaultDamage
+      Damage = config.DefaultDamage,
     });
     Destroy(player);
     Debug.Log($"Player {config.PlayerID} spawned!");
   }
 
-  Vector3[] GetPointsFromTag(string tag) {
+  void SetupStage() {
+    var respawnPoints = GetPointsFromTag(_respawnPoints);
+    var entityManager = _world.EntityManager;
+    var archetype = entityManager.CreateArchetype(
+      ComponentType.ReadWrite<Translation>(),
+      ComponentType.ReadWrite<RespawnPoint>()
+    );
+    foreach (var point in respawnPoints) {
+      var entity = entityManager.CreateEntity(archetype);
+      entityManager.AddComponentData(entity, new Translation { Value = point });
+    }
+  }
+
+  static Vector3[] GetPointsFromTag(string tag) {
     if (tag == null) return new Vector3[0];
     var gameObjects = GameObject.FindGameObjectsWithTag(tag);
     var seenNames = new HashSet<string>();

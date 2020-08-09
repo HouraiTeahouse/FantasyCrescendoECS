@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using Unity.Entities;
+using Random = Unity.Mathematics.Random;
 
 namespace HouraiTeahouse.FantasyCrescendo {
 
@@ -10,11 +11,15 @@ public enum PlayerFlags : byte {
   GROUNDED      = 1 << 1,
   FAST_FALLING  = 1 << 2,
   TEETERING     = 1 << 3,
+  HAS_DIED      = 1 << 4,
+  HAS_RESPAWNED = 1 << 5,
+  EVENT_FLAGS   = HAS_DIED | HAS_RESPAWNED,
 }
 
 public struct PlayerComponent : IComponentData {
 
-  // 12 bytes
+  // 16 bytes
+  public Random RNG;                          // 4 bytes
   public PlayerFlags Flags;                   // 1 byte
   public float Damage;                        // 4 bytes
   [SerializeField] byte _stateID;             // 1 bytes
@@ -50,12 +55,22 @@ public struct PlayerComponent : IComponentData {
   public bool IsRespawning => RespawnTimeRemaining > 0;
   public bool IsHit => Hitstun > 0;
 
-  public bool Is(PlayerFlags flagMask) => (Flags & flagMask) != 0;
-
   public ushort ShieldDamage;
   public ushort ShieldRecoveryCooldown;
 
   public ushort RespawnTimeRemaining;
+
+  public bool Is(PlayerFlags mask) => (Flags & mask) != 0;
+  public void SetFlags(PlayerFlags mask) => Flags |= mask;
+  public void UnsetFlags(PlayerFlags mask) => Flags &= ~mask;
+
+  public void Kill() {
+    SetFlags(PlayerFlags.HAS_DIED);
+    if (Stocks > 0) {
+      Stocks--;
+    }
+  }
+
 }
 
 }

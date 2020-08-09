@@ -2,6 +2,7 @@ using Unity.Entities;
 
 namespace HouraiTeahouse.FantasyCrescendo.Matches {
 
+[UpdateInGroup(typeof(SimulationSystemGroup))]
 [UpdateBefore(typeof(EndSimulationEntityCommandBufferSystem))]
 public class DestroyTemporaryEntities : SystemBase {
 
@@ -20,8 +21,7 @@ public class DestroyTemporaryEntities : SystemBase {
       } else {
         ttl.FramesRemaining--;
       }
-    }).ScheduleParallel();
-
+    }).Schedule();
     _ecbSystem.AddJobHandleForProducer(this.Dependency);
   }
 

@@ -36,7 +36,7 @@ public class MatchPlayerUIDisplay : MonoBehaviour {
     for (var i = 0; i < store.Length; i++) {
       RectTransform playerView = GameObject.Instantiate(prefab);
       if (container != null) {
-        playerView.parent = container;
+        playerView.SetParent(container, false);
       }
       playerView.gameObject.name = playerView.gameObject.name.Replace("(Clone)", "") + " " + (i + 1);
       store[i] = AggregateView<PlayerUIData>.FromGameObject(playerView.gameObject);
