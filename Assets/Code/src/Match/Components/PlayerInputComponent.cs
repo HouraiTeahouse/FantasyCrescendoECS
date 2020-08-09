@@ -4,7 +4,7 @@ using UnityEngine;
 using HouraiTeahouse;
 using HouraiTeahouse.FantasyCrescendo.Utils;
 
-namespace HouraiTeahouse.FantasyCrescendo.Players {
+namespace HouraiTeahouse.FantasyCrescendo.Matches {
 
 public struct PlayerInputComponent : IComponentData {
 

@@ -2,8 +2,9 @@ using HouraiTeahouse.FantasyCrescendo.Matches;
 using UnityEngine.InputSystem;
 using Unity.Collections;
 using Unity.Entities;
+using PlayerInput = HouraiTeahouse.FantasyCrescendo.Matches.PlayerInput;
 
-namespace HouraiTeahouse.FantasyCrescendo.Players {
+namespace HouraiTeahouse.FantasyCrescendo.Matches {
 
 public interface InputSource {
   void AdvanceFrame();

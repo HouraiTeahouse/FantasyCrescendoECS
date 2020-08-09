@@ -1,5 +1,4 @@
-﻿using HouraiTeahouse.FantasyCrescendo.Players;
-using UnityEngine;
+﻿using UnityEngine;
 using Unity.Assertions;
 using Unity.Collections;
 using Unity.Entities;
