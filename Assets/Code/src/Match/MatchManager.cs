@@ -25,6 +25,7 @@ public class MatchManager : MonoBehaviour {
 #pragma warning disable 0649
   [SerializeField, Tag] string _spawnPoints;
   [SerializeField, Tag] string _respawnPoints;
+  [SerializeField] string _matchActionMap = "Match";
   [SerializeField] MatchConfig _config;
 #pragma warning restore 0649
 
@@ -45,6 +46,7 @@ public class MatchManager : MonoBehaviour {
   void FixedUpdate() {
     _world.PushTime(new TimeData(Time.fixedTime, Time.fixedDeltaTime));
     _simulation.Enabled = true;
+    SampleLocalInputs();
     _simulation.Update();
     _simulation.Enabled = false;
     _world.PopTime();
@@ -60,7 +62,19 @@ public class MatchManager : MonoBehaviour {
     _stateWriter?.Dispose();
   }
 
+  void SampleLocalInputs() {
+    var manager = InputManager.Instance;
+    var system = _world?.GetOrCreateSystem<InjectInputsSystem>();
+    if (manager == null || system == null) return;
+    for (var i = 0; i < _config.PlayerCount; i++) {
+      if (!_config[i].IsLocal) continue;
+      var sampledInput = manager.GetInputForPlayer(_config[i].LocalPlayerID);
+      system.SetPlayerInput(_config[i].PlayerID, sampledInput);
+    }
+  }
+
   async Task StartMatch() {
+    InputManager.Instance.ForceNull()?.ChangeActiveActionMap(_matchActionMap);
     await Task.WhenAll(SpawnPlayers());
     _world.EntityManager.CreateEntity(ComponentType.ReadOnly<MatchState>());
     _world.GetExistingSystem<SimulationSystemGroup>().SetSingleton(_config.CreateInitialState());

@@ -76,7 +76,7 @@ public class PlayerInputWatcher : MonoBehaviour {
   [SerializeField] string _shieldAction   = "Match/Shield";
 #pragma warning restore 0649
 
-  void Start() {
+  void Awake() {
     Assert.IsNotNull(_inputSource);
     var index = _inputSource.playerIndex;
     FindObjectOfType<InputManager>().ForceNull()?.Register(index, this);
