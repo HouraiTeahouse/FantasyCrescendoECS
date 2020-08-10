@@ -34,9 +34,11 @@ public class Player : MonoBehaviour, IConvertGameObjectToEntity {
       typeof(Translation), typeof(Hitbox), typeof(Disabled));
     var hitboxArray = new NativeArray<PlayerHitboxBuffer>(size, Allocator.Temp);
     for (var i = 0; i < size; i++) {
-      hitboxArray[i] = new PlayerHitboxBuffer { 
-        Hitbox = entityManager.CreateEntity(hitboxArchetype) 
-      };
+      var entity = entityManager.CreateEntity(hitboxArchetype);
+#if UNITY_EDITOR
+      entityManager.SetName(entity, $"{name}, Hitbox {i + 1}");
+#endif
+      hitboxArray[i] = new PlayerHitboxBuffer { Hitbox = entity };
     }
     return hitboxArray;
   }

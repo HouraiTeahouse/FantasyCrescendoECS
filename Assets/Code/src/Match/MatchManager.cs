@@ -102,21 +102,31 @@ public class MatchManager : MonoBehaviour {
     await DataLoader.WaitUntilLoaded();
     SetupStage();
     var spawnPoints = GetPointsFromTag(_spawnPoints);
-    var tasks = new Task[_config.PlayerCount];
+    var tasks = new Task<GameObject>[_config.PlayerCount];
     for (var i = 0; i < _config.PlayerCount; i++) {
       Vector3 spawnPoint = spawnPoints[i % spawnPoints.Length];
-      tasks[i] = SpawnPlayer(_config[i], spawnPoint);
+      tasks[i] = LoadPlayerGameObject(_config[i], spawnPoint);
     }
-    await Task.WhenAll(tasks);
+    var playerGos = await Task.WhenAll(tasks);
+    for (var i = 0; i < playerGos.Length; i++) {
+      SpawnPlayer(_config[i], playerGos[i]);
+    }
     Debug.Log("Players spawned!");
   }
 
-  async Task SpawnPlayer(PlayerConfig config, Vector3 position) {
-    var settings = new GameObjectConversionSettings(_world, 
-                        GameObjectConversionUtility.ConversionFlags.AssignName);
+  async Task<GameObject> LoadPlayerGameObject(PlayerConfig config, Vector3 position) {
     var pallete = config.Selection.GetPallete();
     var prefab = await pallete.Prefab.LoadAssetAsync<GameObject>().Task;
     var player = GameObject.Instantiate(prefab, position, Quaternion.identity);
+#if UNITY_EDITOR
+    player.name = $"Player {config.PlayerID + 1} ({prefab.name})";
+#endif
+    return player;
+  }
+
+  void SpawnPlayer(PlayerConfig config, GameObject player) {
+    var settings = new GameObjectConversionSettings(_world, 
+                        GameObjectConversionUtility.ConversionFlags.AssignName);
     var entity = GameObjectConversionUtility.ConvertGameObjectHierarchy(player, settings);
     _world.EntityManager.AddComponentData(entity, config);
     _world.EntityManager.AddComponentData(entity, new PlayerComponent {
