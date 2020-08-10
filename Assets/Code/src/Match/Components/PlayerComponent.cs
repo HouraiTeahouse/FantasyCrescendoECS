@@ -3,7 +3,7 @@ using UnityEngine;
 using Unity.Entities;
 using Random = Unity.Mathematics.Random;
 
-namespace HouraiTeahouse.FantasyCrescendo {
+namespace HouraiTeahouse.FantasyCrescendo.Matches {
 
 [Flags]
 public enum PlayerFlags : byte {
@@ -17,6 +17,8 @@ public enum PlayerFlags : byte {
 }
 
 public struct PlayerComponent : IComponentData {
+
+  public BlobAssetReference<CharacterStateController> StateController;
 
   // 16 bytes
   public Random RNG;                          // 4 bytes
