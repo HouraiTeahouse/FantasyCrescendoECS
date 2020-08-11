@@ -122,38 +122,27 @@ public class PlayerRespawnSystem : SystemBase {
   }
 
   protected override void OnUpdate() {
-    var playerQuery = GetEntityQuery(ComponentType.ReadWrite<PlayerComponent>(), ComponentType.ReadWrite<Translation>());
-    var respawnQuery = GetEntityQuery(ComponentType.ReadOnly<Translation>(), ComponentType.ReadWrite<RespawnPoint>());
-
-    var playerEntites = playerQuery.ToEntityArray(Allocator.TempJob);
-    var players = playerQuery.ToComponentDataArray<PlayerComponent>(Allocator.TempJob);
-    var playersPos = playerQuery.ToComponentDataArray<Translation>(Allocator.TempJob);
-    var respawnPoints = respawnQuery.ToComponentDataArray<Translation>(Allocator.TempJob);
-
     var ecb = _ecbSystem.CreateCommandBuffer();
+
+    var respawnPoints = GetEntityQuery(
+      ComponentType.ReadOnly<Translation>(), 
+      ComponentType.ReadOnly<RespawnPoint>())
+      .ToComponentDataArray<Translation>(Allocator.TempJob);
 
     // FIXME(james7132): This has the potential for mulitple players to respawn at the 
     // same point. 
-    Job
-      .WithDeallocateOnJobCompletion(respawnPoints)
-      .WithDeallocateOnJobCompletion(playerEntites)
-      .WithDeallocateOnJobCompletion(playersPos)
-      .WithDeallocateOnJobCompletion(players)
-      .WithCode(() => {
-        for (var i = 0; i < players.Length; i++) {
-          PlayerComponent player = players[i];
-          if (player.Is(PlayerFlags.HAS_RESPAWNED)) {
-            var idx = player.RNG.NextInt(respawnPoints.Length);
-            playersPos[i] = respawnPoints[idx];
-          } else if (player.Is(PlayerFlags.HAS_DIED)) {
-            // Disable players that have died without respawning.
-            ecb.AddComponent<Disabled>(playerEntites[i]);
-          }
-          player.UnsetFlags(PlayerFlags.EVENT_FLAGS);
-          players[i] = player;
-        }
-      })
-      .Schedule();
+    Entities.ForEach((Entity entity, ref PlayerComponent player, ref Translation translation) => {
+      if (player.Is(PlayerFlags.HAS_RESPAWNED)) {
+        var idx = player.RNG.NextInt(respawnPoints.Length);
+        translation = respawnPoints[idx];
+      } else if (player.Is(PlayerFlags.HAS_DIED)) {
+        // Disable players that have died without respawning.
+        ecb.AddComponent<Disabled>(entity);
+      }
+      player.UnsetFlags(PlayerFlags.EVENT_FLAGS);
+    }).Schedule();
+
+    Dependency = respawnPoints.Dispose(Dependency);
     _ecbSystem.AddJobHandleForProducer(this.Dependency);
   }
 

@@ -26,7 +26,7 @@ public class PlayerUIDisplaySystem : SystemBase {
   protected override void OnUpdate() {
     var data = MatchConfig.CreateNativePlayerBuffer<PlayerUIData>(Allocator.TempJob);
     Entities
-      //.WithEntityQueryOptions(EntityQueryOptions.IncludeDisabled)
+      .WithEntityQueryOptions(EntityQueryOptions.IncludeDisabled)
       .ForEach((in PlayerComponent player, in PlayerConfig config, 
                       in Translation translation) => {
       data[config.PlayerID] = new PlayerUIData {

@@ -1,4 +1,5 @@
 using UnityEngine;
+using Unity.Mathematics;
 
 namespace HouraiTeahouse.FantasyCrescendo.Utils {
 
@@ -51,6 +52,10 @@ public struct Vector2b {
 
   public static explicit operator Vector2b(Vector2 vector) => new Vector2b { x = vector.x, y = vector.y };
   public static explicit operator Vector2(Vector2b vector) => new Vector2 { x = vector.x, y = vector.y };
+  public static explicit operator Vector2b(float2 vector) => new Vector2b { x = vector.x, y = vector.y };
+  public static explicit operator float2(Vector2b vector) => new float2 { x = vector.x, y = vector.y };
+  public static explicit operator Vector2b(float3 vector) => new Vector2b { x = vector.x, y = vector.y };
+  public static explicit operator float3(Vector2b vector) => new float3 { x = vector.x, y = vector.y };
 
   float ToFloat(sbyte val) => (float)val / sbyte.MaxValue;
   sbyte FromFloat(float val) => (sbyte)(Mathf.Clamp(val, -1, 1) * sbyte.MaxValue);
