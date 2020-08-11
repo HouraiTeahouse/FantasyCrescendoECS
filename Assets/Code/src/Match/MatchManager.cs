@@ -18,6 +18,7 @@ public class MatchManager : MonoBehaviour {
   World _world;
   SimulationSystemGroup _simulation;
   DynamicBinaryWriter _stateWriter;
+  BlobAssetStore _blobAssetStore;
 
   public static MatchManager Instance { get; private set; }
   public bool IsMatchRunning { get; private set; }
@@ -99,6 +100,7 @@ public class MatchManager : MonoBehaviour {
   async Task SpawnPlayers() {
     await DataLoader.WaitUntilLoaded();
     SetupStage();
+    _blobAssetStore = new BlobAssetStore();
     var spawnPoints = GetPointsFromTag(_spawnPoints);
     var tasks = new Task<GameObject>[_config.PlayerCount];
     for (var i = 0; i < _config.PlayerCount; i++) {
@@ -124,7 +126,8 @@ public class MatchManager : MonoBehaviour {
 
   void SpawnPlayer(PlayerConfig config, GameObject player) {
     var settings = new GameObjectConversionSettings(_world, 
-                        GameObjectConversionUtility.ConversionFlags.AssignName);
+                        GameObjectConversionUtility.ConversionFlags.AssignName, 
+                        _blobAssetStore);
     var entity = GameObjectConversionUtility.ConvertGameObjectHierarchy(player, settings);
     _world.EntityManager.AddComponentData(entity, config);
     _world.EntityManager.AddComponentData(entity, new PlayerComponent {

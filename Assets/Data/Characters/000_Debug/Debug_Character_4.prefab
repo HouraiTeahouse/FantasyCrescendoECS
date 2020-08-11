@@ -7,6 +7,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 475767547384208132, guid: 1a966b5a1e7b757448aa1e5ba1b18ed6,
+        type: 3}
+      propertyPath: m_PrimitiveOrientation.Value.z
+      value: -90
+      objectReference: {fileID: 0}
     - target: {fileID: 1413820065245573852, guid: 1a966b5a1e7b757448aa1e5ba1b18ed6,
         type: 3}
       propertyPath: m_Materials.Array.data[0]
@@ -70,7 +75,7 @@ PrefabInstance:
     - target: {fileID: 1413820065312423927, guid: 1a966b5a1e7b757448aa1e5ba1b18ed6,
         type: 3}
       propertyPath: m_Name
-      value: Debug_Character
+      value: Debug_Character_4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1a966b5a1e7b757448aa1e5ba1b18ed6, type: 3}

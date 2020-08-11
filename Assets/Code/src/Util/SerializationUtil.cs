@@ -103,7 +103,7 @@ public unsafe class DynamicBinaryWriter : BinaryBuffer, BinaryWriter {
   /// <param name="bufSize">the size of the buffer to write from</param>
   public void WriteBytes(void* buf, int bufSize) {
     Assert.IsTrue(IsValid);
-    if (_current + bufSize >= _end) {
+    if (_current + bufSize > _end) {
       ResizeBuffer(Size + bufSize);
     }
     UnsafeUtility.MemCpy(_current, buf, bufSize);
