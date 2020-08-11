@@ -17,14 +17,14 @@ public struct PlayerUIData {
 [UpdateInGroup(typeof(PresentationSystemGroup))]
 public class PlayerUIDisplaySystem : SystemBase {
 
-  PlayerUIData[] _data;
+  NativeArray<PlayerUIData> _data;
 
   protected override void OnCreate() {
-    _data = MatchConfig.CreatePlayerBuffer<PlayerUIData>();
+    _data = MatchConfig.CreateNativePlayerBuffer<PlayerUIData>();
   }
 
   protected override void OnUpdate() {
-    var data = MatchConfig.CreateNativePlayerBuffer<PlayerUIData>(Allocator.TempJob);
+    NativeArray<PlayerUIData> data = _data;
     Entities
       .WithEntityQueryOptions(EntityQueryOptions.IncludeDisabled)
       .ForEach((in PlayerComponent player, in PlayerConfig config, 
@@ -35,12 +35,15 @@ public class PlayerUIDisplaySystem : SystemBase {
         PlayerData = player,
         WorldPosition = translation.Value
       };
-    }).Schedule(this.Dependency).Complete();
-    data.CopyTo(_data);
-    data.Dispose();
+    }).Schedule();
+  }
+
+  protected override void OnDestroy() {
+    _data.Dispose();
   }
 
   public PlayerUIData GetPlayerUIData(int playerId) {
+    CompleteDependency();
     Assert.IsTrue(playerId >= 0 && playerId < MatchConfig.kMaxSupportedPlayers);
     return _data[playerId];
   }
