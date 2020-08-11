@@ -40,6 +40,22 @@ public abstract unsafe class BinaryBuffer {
   public ReadOnlySpan<byte> AsReadOnlySpan() {
     return new ReadOnlySpan<byte>(_start, Size);
   }
+
+  public unsafe byte[] ToArray() {
+    var buffer = new byte[Size];
+    fixed (byte* ptr = buffer) {
+      UnsafeUtility.MemCpy(ptr, _start, Size);
+    }
+    return buffer;
+  }
+
+  public unsafe uint XXHash() {
+    return Unity.Core.XXHash.Hash32(_start, Size);
+  }
+
+  public FixedBinaryReader ToReader() {
+    return new FixedBinaryReader(_start, Size);
+  }
   
   /// <summary>
   /// Seeks a position in the buffer.

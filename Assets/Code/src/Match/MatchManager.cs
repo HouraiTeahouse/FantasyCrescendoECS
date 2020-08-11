@@ -54,7 +54,6 @@ public class MatchManager : MonoBehaviour {
 
   void Update() {
     SerializeUtility.SerializeWorld(_world.EntityManager, _stateWriter);
-    _stateWriter.Trim();
     _stateWriter.Reset(1024);
   }
 
@@ -81,8 +80,7 @@ public class MatchManager : MonoBehaviour {
 
     var enabledRules = new HashSet<Type>(MakeMatchRules());
     foreach (var system in _world.GetExistingSystem<MatchRuleSystemGroup>().Systems) {
-      system.Enabled = enabledRules.Contains(system.GetType());
-      if (system.Enabled) {
+      if (system.Enabled = enabledRules.Contains(system.GetType())) {
         Debug.Log($"Enabled match rule: {system}");
       }
     }

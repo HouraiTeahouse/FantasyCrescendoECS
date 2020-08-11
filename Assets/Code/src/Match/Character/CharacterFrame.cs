@@ -1,4 +1,5 @@
 using System;
+using Unity.Entities;
 using HitboxBitfield = System.UInt64;
 
 namespace HouraiTeahouse.FantasyCrescendo.Matches {
@@ -28,7 +29,7 @@ public enum FrameFlags : uint {
   SUPER_ARMOR = 1 << 3
 }
 
-public struct CharacterFrame {
+public struct CharacterFrame : IComponentData {
 
   public const int kMaxPlayerHitboxCount = sizeof(HitboxBitfield) * 8;
 

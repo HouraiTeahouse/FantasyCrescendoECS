@@ -17,6 +17,7 @@ public class Player : MonoBehaviour, IConvertGameObjectToEntity {
                       GameObjectConversionSystem conversionSystem) {
     entityManager.AddComponent(entity, typeof(PlayerConfig));
     entityManager.AddComponent(entity, typeof(PlayerInputComponent));
+    entityManager.AddComponent(entity, typeof(CharacterFrame));
     entityManager.AddComponentData(entity, new PlayerComponent {
       StateController = _frameData != null ? 
         _frameData.BuildController() : 
