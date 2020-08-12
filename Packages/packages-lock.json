@@ -1,5 +1,29 @@
 {
   "dependencies": {
+    "com.discord.game-sdk": {
+      "version": "2.5.5",
+      "depth": 2,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://upm.houraiteahouse.net"
+    },
+    "com.facepunch.steamworks": {
+      "version": "2.2.1",
+      "depth": 2,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://upm.houraiteahouse.net"
+    },
+    "com.houraiteahouse.backroll": {
+      "version": "0.1.1",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.houraiteahouse.core": "1.0.1",
+        "com.houraiteahouse.networking": "0.1.3"
+      },
+      "url": "https://upm.houraiteahouse.net"
+    },
     "com.houraiteahouse.config": {
       "version": "1.0.0",
       "depth": 0,
@@ -13,6 +37,27 @@
       "source": "registry",
       "dependencies": {
         "com.unity.inputsystem": "1.0.0-preview.1"
+      },
+      "url": "https://upm.houraiteahouse.net"
+    },
+    "com.houraiteahouse.lz4": {
+      "version": "2.0.1",
+      "depth": 2,
+      "source": "registry",
+      "dependencies": {
+        "com.houraiteahouse.core": "1.0.1"
+      },
+      "url": "https://upm.houraiteahouse.net"
+    },
+    "com.houraiteahouse.networking": {
+      "version": "0.1.3",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {
+        "com.houraiteahouse.core": "1.0.1",
+        "com.houraiteahouse.lz4": "2.0.1",
+        "com.discord.game-sdk": "2.5.5",
+        "com.facepunch.steamworks": "2.2.1"
       },
       "url": "https://upm.houraiteahouse.net"
     },

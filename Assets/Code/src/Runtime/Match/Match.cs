@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Core;
+using Unity.Collections;
 using Unity.Transforms;
 using Unity.Assertions;
 using Unity.Entities;
@@ -50,7 +51,7 @@ public abstract class Match : IDisposable {
   protected void Step() {
     World.PushTime(new TimeData(Time.fixedTime, Time.fixedDeltaTime));
     Simulation.Enabled = true;
-    SampleLocalInputs();
+    SampleInputs();
     Simulation.Update();
     Simulation.Enabled = false;
     World.PopTime();
@@ -64,14 +65,21 @@ public abstract class Match : IDisposable {
 
   protected abstract IEnumerable<Type> GetRuleTypes();
 
-  void SampleLocalInputs() {
+  protected virtual void SampleInputs() {
     var manager = InputManager.Instance;
-    var system = World?.GetOrCreateSystem<InjectInputsSystem>();
-    if (manager == null || system == null) return;
+    if (manager == null) return;
+    var inputs = MatchConfig.CreateNativePlayerBuffer<PlayerInput>(Allocator.Temp);
     for (var i = 0; i < Config.PlayerCount; i++) {
       if (!Config[i].IsLocal) continue;
-      var sampledInput = manager.GetInputForPlayer(Config[i].LocalPlayerID);
-      system.SetPlayerInput(Config[i].PlayerID, sampledInput);
+      inputs[Config[i].PlayerID] = manager.GetInputForPlayer(Config[i].LocalPlayerID);
+    }
+    InjectInputs(inputs);
+  }
+
+  protected void InjectInputs(NativeArray<PlayerInput> inputs) {
+    var system = World?.GetOrCreateSystem<InjectInputsSystem>();
+    for (var i = 0; i < inputs.Length; i++) {
+      system.SetPlayerInput(i, inputs[i]);
     }
   }
 
