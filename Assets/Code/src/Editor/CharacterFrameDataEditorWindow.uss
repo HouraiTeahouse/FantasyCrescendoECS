@@ -1,0 +1,27 @@
+#ButtonHolder {
+	width: auto;
+
+	display: flex;
+	flex-direction: row;
+}
+
+#Container {
+	display: flex;
+	flex-direction: row;
+	width: auto;
+}
+
+#RightPanel {
+	position: relative;
+	flex: 1;
+	width: auto;
+	border-width: 2px;
+}
+
+#LeftPanel {
+	display: flex;
+	-unity-text-align: middle-center;
+	flex: 1;
+	width: auto;
+	border-width: 2px;
+}
