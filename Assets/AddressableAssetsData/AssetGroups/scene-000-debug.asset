@@ -17,19 +17,13 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: 34bf1610987c38c47afde34168d118be
   m_SerializeEntries:
-  - m_GUID: 57bc7059ed907184bb6a87c4e374c800
-    m_Address: Assets/Data/Scenes/000_DebugStage/DebugStage.unity
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    m_MainAsset: {fileID: 102900000, guid: 57bc7059ed907184bb6a87c4e374c800, type: 3}
-    m_TargetAsset: {fileID: 102900000, guid: 57bc7059ed907184bb6a87c4e374c800, type: 3}
   - m_GUID: f86169d06f2d0fa4999e1b82b6512110
     m_Address: Assets/Data/Scenes/000_DebugStage/DebugStage.asset
     m_ReadOnly: 0
     m_SerializedLabels:
     - Scene
-    m_MainAsset: {fileID: 11400000, guid: f86169d06f2d0fa4999e1b82b6512110, type: 2}
-    m_TargetAsset: {fileID: 11400000, guid: f86169d06f2d0fa4999e1b82b6512110, type: 2}
+    m_MainAsset: {fileID: 0}
+    m_TargetAsset: {fileID: 0}
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 1801368299d5cb1498033e00355577f4, type: 2}
   m_SchemaSet:

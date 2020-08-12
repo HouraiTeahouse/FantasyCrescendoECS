@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using Unity.Assertions;
 using Unity.Entities;
+using Unity.Transforms;
 
 namespace HouraiTeahouse.FantasyCrescendo.Matches {
 
@@ -27,6 +28,13 @@ public enum TransitionCondition : uint {
   CHARGE_MAX      = 1 << 16,
 }
 
+public struct CharacterStateHitbox {
+  public bool Enabled;
+  public Translation Translation;
+  public Scale Scale;
+  public Hitbox Hitbox;
+}
+
 public struct CharacterStateTransition {
   public int TargetStateID;
   public uint TargetFrame;
@@ -37,7 +45,7 @@ public struct CharacterStateTransition {
 public struct CharacterState {
   public BlobString Name;
   public BlobArray<CharacterFrame> Frames;
-  public BlobArray<Hitbox> Hitboxes;
+  public BlobArray<CharacterStateHitbox> Hitboxes;
   public BlobArray<CharacterStateTransition> Transitions;
 }
 
@@ -62,11 +70,6 @@ public class StateFrameData : ScriptableObject {
     }
   }
 
-  public class TrackHitbox {
-    public bool Enabled;
-    public Hitbox Hitbox;
-  }
-
   public class Track {
     // A list of booleans
     public string Name;
@@ -74,7 +77,7 @@ public class StateFrameData : ScriptableObject {
     public bool Enabled;
     public FrameFlags Flags;
     public List<int> TogglePoints;
-    public List<TrackHitbox> Hitboxes;
+    public List<CharacterStateHitbox> Hitboxes;
 
     public void Apply(CharacterFrame[] frames, int hitboxOffset = 0) {
       if (!Enabled) return;
@@ -164,13 +167,13 @@ public class StateFrameData : ScriptableObject {
     return frames;
   }
 
-  Hitbox[] BuildHitboxes() {
-    var hitboxes = new List<Hitbox>();
+  CharacterStateHitbox[] BuildHitboxes() {
+    var hitboxes = new List<CharacterStateHitbox>();
     foreach (var track in _tracks) {
       if (!track.Enabled) continue;
       foreach (var hitbox in track.Hitboxes) {
         if (!hitbox.Enabled) continue;
-        hitboxes.Add(hitbox.Hitbox);
+        hitboxes.Add(hitbox);
         if (hitboxes.Count >= CharacterFrame.kMaxPlayerHitboxCount) {
           return hitboxes.ToArray();
         }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using HouraiTeahouse.FantasyCrescendo.Utils;
+using HouraiTeahouse.FantasyCrescendo.Authoring;
+using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using UnityEngine;
@@ -115,6 +117,8 @@ public abstract class Match : IDisposable {
 #if UNITY_EDITOR
     player.name = $"Player {config.PlayerID + 1} ({prefab.name})";
 #endif
+    var playerComponent = ObjectUtil.GetOrAddComponent<Player>(player);
+    playerComponent.PlayerID = config.PlayerID;
     return player;
   }
 

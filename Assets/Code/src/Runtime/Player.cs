@@ -9,6 +9,8 @@ namespace HouraiTeahouse.FantasyCrescendo.Authoring {
 
 public class Player : MonoBehaviour, IConvertGameObjectToEntity {
 
+  [NonSerialized] public uint PlayerID;
+
 #pragma warning disable 0649
   [SerializeField] CharacterFrameData _frameData;
 #pragma warning restore 0649
@@ -24,24 +26,37 @@ public class Player : MonoBehaviour, IConvertGameObjectToEntity {
         default(BlobAssetReference<CharacterStateController>)
     });
 
-    // Allocate 64 player hitboxes for immediate player use.
-    var hitboxArray = CreatePlayerHitboxes(entityManager, CharacterFrame.kMaxPlayerHitboxCount);
-    entityManager.AddBuffer<PlayerHitboxBuffer>(entity).AddRange(hitboxArray);
+    // Allocate player hitboxes for immediate player use.
+    //CreatePlayerHitboxes(entity, entityManager, CharacterFrame.kMaxPlayerHitboxCount);
   }
 
+  void CreatePlayerHitboxes(Entity player, EntityManager entityManager, int size) {
+    var archetype = entityManager.CreateArchetype(
+      typeof(Translation), typeof(Parent), typeof(Scale), 
+      typeof(LocalToParent), typeof(LocalToWorld),
+      typeof(Hitbox), typeof(HitboxState));
 
-  NativeArray<PlayerHitboxBuffer> CreatePlayerHitboxes(EntityManager entityManager, int size) {
-    var hitboxArchetype = entityManager.CreateArchetype(
-      typeof(Translation), typeof(Hitbox), typeof(Disabled));
-    var hitboxArray = new NativeArray<PlayerHitboxBuffer>(size, Allocator.Temp);
+    var group = new NativeArray<LinkedEntityGroup>(size, Allocator.Temp);
+    var hitboxes = new NativeArray<PlayerHitboxBuffer>(size, Allocator.Temp);
     for (var i = 0; i < size; i++) {
-      var entity = entityManager.CreateEntity(hitboxArchetype);
+      var entity = entityManager.CreateEntity(archetype);
+      entityManager.AddComponentData(entity, new Scale { Value = 1.0f });
+      entityManager.AddComponentData(entity, new Parent { Value = player });
+      entityManager.AddComponentData(entity, new HitboxState {
+        PlayerID = this.PlayerID,
+        Enabled = false
+      });
+
+      group[i] = new LinkedEntityGroup { Value = entity };
+      hitboxes[i] = new PlayerHitboxBuffer { Hitbox = entity };
+
 #if UNITY_EDITOR
       entityManager.SetName(entity, $"{name}, Hitbox {i + 1}");
 #endif
-      hitboxArray[i] = new PlayerHitboxBuffer { Hitbox = entity };
     }
-    return hitboxArray;
+
+    entityManager.AddBuffer<LinkedEntityGroup>(player).AddRange(group);
+    entityManager.AddBuffer<PlayerHitboxBuffer>(player).AddRange(hitboxes);
   }
 
 }

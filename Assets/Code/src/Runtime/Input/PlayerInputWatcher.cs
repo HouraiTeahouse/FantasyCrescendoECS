@@ -76,12 +76,29 @@ public class PlayerInputWatcher : MonoBehaviour {
   [SerializeField] string _shieldAction   = "Match/Shield";
 #pragma warning restore 0649
 
+  InputAction movementAction;
+  InputAction strongAction;
+  InputAction attackAction;
+  InputAction specialAction;
+  InputAction jumpAction;
+  InputAction grabAction;
+  InputAction shieldAction;
+
   void Awake() {
     Assert.IsNotNull(_inputSource);
     var index = _inputSource.playerIndex;
     FindObjectOfType<InputManager>().ForceNull()?.Register(index, this);
     Debug.Log($"Local player {index} started.");
     gameObject.name = gameObject.name.Replace("(Clone)", "") + " " + index.ToString();
+
+    InputActionAsset actions =_inputSource.actions;
+    movementAction = actions[_movementAction];
+    strongAction = actions[_strongAction];
+    attackAction = actions[_attackAction];
+    specialAction = actions[_specialAction];
+    jumpAction = actions[_jumpAction];
+    grabAction = actions[_grabAction];
+    shieldAction = actions[_shieldAction];
   }
 
   void OnDestroy() {
@@ -91,13 +108,13 @@ public class PlayerInputWatcher : MonoBehaviour {
   public PlayerInput GetLatestInputs() {
     InputActionAsset actions =_inputSource.actions;
     return new PlayerInput {
-      Movement = (Vector2b)actions[_movementAction].ReadValue<Vector2>(),
-      Smash    = (Vector2b)actions[_strongAction].ReadValue<Vector2>(),
-      Attack   = actions[_attackAction].ReadValue<bool>(),
-      Special  = actions[_specialAction].ReadValue<bool>(),
-      Jump     = actions[_jumpAction].ReadValue<bool>(),
-      Grab     = actions[_grabAction].ReadValue<bool>(),
-      Shield   = actions[_shieldAction].ReadValue<bool>(),
+      Movement = (Vector2b)movementAction.ReadValue<Vector2>(),
+      Smash    = (Vector2b)strongAction.ReadValue<Vector2>(),
+      Attack   = attackAction.ReadValue<bool>(),
+      Special  = specialAction.ReadValue<bool>(),
+      Jump     = jumpAction.ReadValue<bool>(),
+      Grab     = grabAction.ReadValue<bool>(),
+      Shield   = shieldAction.ReadValue<bool>(),
     };
   }
 

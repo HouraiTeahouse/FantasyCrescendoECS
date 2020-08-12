@@ -1,49 +1,52 @@
 ﻿using Unity.Mathematics;
 using Unity.Entities;
+using Unity.Transforms;
 
 namespace HouraiTeahouse.FantasyCrescendo.Matches {
 
 [UpdateInGroup(typeof(SimulationSystemGroup))]
-[UpdateBefore(typeof(BeginSimulationEntityCommandBufferSystem))]
+[UpdateBefore(typeof(TransformSystemGroup))]
 public class SampleFrameDataSystem : SystemBase {
-
-  BeginSimulationEntityCommandBufferSystem _ecbSystem;
-
-  protected override void OnCreate() {
-    base.OnCreate();
-    _ecbSystem = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
-  }
 
   protected override void OnUpdate() {
     var entityManager = World.EntityManager;
-    var ecb = _ecbSystem.CreateCommandBuffer();
 
-    Entities.ForEach((Entity entity, ref PlayerComponent player, ref CharacterFrame frameData) => {
+    var hitboxes = GetComponentDataFromEntity<Hitbox>(false);
+    var hitboxStates = GetComponentDataFromEntity<HitboxState>(false);
+    var positions = GetComponentDataFromEntity<Translation>(false);
+    var scales = GetComponentDataFromEntity<Scale>(false);
+
+    Entities.ForEach((Entity entity, ref PlayerComponent player, ref CharacterFrame frame) => {
       player.StateTick++;
-      CharacterFrame? frame = GetFrame(player);
-      if (frame == null) return;
-      frameData = frameData;
-      var hitboxes = entityManager.GetBuffer<PlayerHitboxBuffer>(entity);
-      for (var i = 0; i < hitboxes.Length; i++) {
-        if (frameData.IsHitboxActive(i)) {
-          ecb.RemoveComponent<Disabled>(hitboxes[i].Hitbox);
-        } else  {
-          ecb.AddComponent<Disabled>(hitboxes[i].Hitbox);
-        }
+      bool validState = GetState(player, out CharacterState state);
+      if (!validState) return;
+      frame = state.Frames[math.min(player.StateTick, state.Frames.Length - 1)];
+      var playerHitboxes = entityManager.GetBuffer<PlayerHitboxBuffer>(entity);
+      for (var i = 0; i < playerHitboxes.Length; i++) {
+        Entity hitbox = playerHitboxes[i].Hitbox;
+
+        var hitboxState = hitboxStates[hitbox];
+        hitboxState.Enabled = frame.IsHitboxActive(i);
+        hitboxStates[hitbox] = hitboxState;
+
+        if (i >= state.Hitboxes.Length) continue;
+        hitboxes[hitbox] = state.Hitboxes[i].Hitbox;
+        positions[hitbox] = state.Hitboxes[i].Translation;
+        scales[hitbox] = state.Hitboxes[i].Scale;
       }
     }).Schedule();
-    _ecbSystem.AddJobHandleForProducer(this.Dependency);
+
     CompleteDependency();
   }
 
-  static CharacterFrame? GetFrame(in PlayerComponent player) {
+  static bool GetState(in PlayerComponent player, out CharacterState state) {
+    state = new CharacterState();
     var stateId = player.StateID;
-    if (!player.StateController.IsCreated || stateId < 0) return null;
+    if (!player.StateController.IsCreated || stateId < 0) return false;
     ref var states = ref player.StateController.Value.States;
-    if (states.Length == 0) return null;
-    ref var frames = ref states[stateId].Frames;
-    if (frames.Length == 0) return null;
-    return frames[math.min(player.StateTick, frames.Length - 1)];
+    if (states.Length == 0) return false;
+    state = ref states[stateId];
+    return true;
   }
 
 }
