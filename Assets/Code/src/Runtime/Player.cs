@@ -27,7 +27,7 @@ public class Player : MonoBehaviour, IConvertGameObjectToEntity {
     });
 
     // Allocate player hitboxes for immediate player use.
-    //CreatePlayerHitboxes(entity, entityManager, CharacterFrame.kMaxPlayerHitboxCount);
+    CreatePlayerHitboxes(entity, entityManager, CharacterFrame.kMaxPlayerHitboxCount);
   }
 
   void CreatePlayerHitboxes(Entity player, EntityManager entityManager, int size) {
@@ -37,18 +37,18 @@ public class Player : MonoBehaviour, IConvertGameObjectToEntity {
       typeof(Hitbox), typeof(HitboxState));
 
     var group = new NativeArray<LinkedEntityGroup>(size, Allocator.Temp);
-    var hitboxes = new NativeArray<PlayerHitboxBuffer>(size, Allocator.Temp);
     for (var i = 0; i < size; i++) {
       var entity = entityManager.CreateEntity(archetype);
       entityManager.AddComponentData(entity, new Scale { Value = 1.0f });
       entityManager.AddComponentData(entity, new Parent { Value = player });
       entityManager.AddComponentData(entity, new HitboxState {
+        Player = player,
+        ID = i,
         PlayerID = this.PlayerID,
         Enabled = false
       });
 
       group[i] = new LinkedEntityGroup { Value = entity };
-      hitboxes[i] = new PlayerHitboxBuffer { Hitbox = entity };
 
 #if UNITY_EDITOR
       entityManager.SetName(entity, $"{name}, Hitbox {i + 1}");
@@ -56,7 +56,6 @@ public class Player : MonoBehaviour, IConvertGameObjectToEntity {
     }
 
     entityManager.AddBuffer<LinkedEntityGroup>(player).AddRange(group);
-    entityManager.AddBuffer<PlayerHitboxBuffer>(player).AddRange(hitboxes);
   }
 
 }

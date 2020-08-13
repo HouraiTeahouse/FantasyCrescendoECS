@@ -97,7 +97,7 @@ public unsafe abstract class RollbackMatch : Match {
   protected unsafe virtual void Deserialize(void* buffer, int len) {
     Assert.AreEqual(sizeof(WorldStorageID), len);
     Assert.IsTrue(WorldStorage.TryGetValue(*(WorldStorageID*)buffer, out World world));
-    EntityManager.CopyAndReplaceEntitiesFrom(world.EntityManager);
+    EntityManager.CopyAndReplaceEntitiesFrom(World.EntityManager);
   }
 
   protected unsafe virtual void ReleaseWorld(IntPtr buffer) {

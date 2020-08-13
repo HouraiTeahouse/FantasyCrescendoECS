@@ -8,6 +8,7 @@ using Unity.Core;
 using Unity.Collections;
 using Unity.Transforms;
 using Unity.Assertions;
+using Unity.Mathematics;
 using Unity.Entities;
 
 namespace HouraiTeahouse.FantasyCrescendo.Matches {
@@ -93,13 +94,10 @@ public abstract class Match : IDisposable {
   }
 
   void SetupStage(MatchInitializationSettings settings) {
-    var archetype = EntityManager.CreateArchetype(
-      ComponentType.ReadWrite<Translation>(),
-      ComponentType.ReadWrite<RespawnPoint>()
-    );
+    var system  = World.GetExistingSystem<PlayerRespawnSystem>();
+    system.Reset();
     foreach (var point in settings.RespawnPoints) {
-      var entity = EntityManager.CreateEntity(archetype);
-      EntityManager.AddComponentData(entity, new Translation { Value = point.position });
+      system.AddRespawnPoint(point.position);
     }
   }
 

@@ -2,6 +2,7 @@
 using UnityEngine;
 using Unity.Assertions;
 using Unity.Collections;
+using Unity.Mathematics;
 using Unity.Entities;
 using Unity.Transforms;
 using Random = Unity.Mathematics.Random;
@@ -50,7 +51,11 @@ public class StockMatchRuleSystem : MatchRuleSystem {
 [UpdateInGroup(typeof(MatchRuleSystemGroup))]
 public class TimeMatchRuleSystem : MatchRuleSystem {
 
-  bool _stockRuleActive;
+  StockMatchRuleSystem _stockRule;
+
+  protected override void OnCreate() {
+    _stockRule = World.GetOrCreateSystem<StockMatchRuleSystem>();
+  }
 
   protected override void OnUpdate() {
     var matchState = GetSingleton<MatchState>();
@@ -61,14 +66,13 @@ public class TimeMatchRuleSystem : MatchRuleSystem {
     }
     SetSingleton(matchState);
 
-    _stockRuleActive = World.GetOrCreateSystem<StockMatchRuleSystem>().Enabled;
-    if (!_stockRuleActive) {
-      Entities.ForEach((ref PlayerComponent player) => {
-        if (player.Is(PlayerFlags.HAS_DIED)) {
-          player.SetFlags(PlayerFlags.HAS_RESPAWNED);
-        }
-      }).Schedule();
-    }
+    if (_stockRule.Enabled) return;
+
+    Entities.ForEach((ref PlayerComponent player) => {
+      if (player.Is(PlayerFlags.HAS_DIED)) {
+        player.SetFlags(PlayerFlags.HAS_RESPAWNED);
+      }
+    }).Schedule();
   }
 
 }
@@ -114,20 +118,18 @@ public class BlastZoneSystem : MatchRuleSystem {
 [UpdateInGroup(typeof(LateSimulationSystemGroup), OrderLast = true)]
 public class PlayerRespawnSystem : SystemBase {
 
+  NativeList<Translation> _respawnPoints;
   EndSimulationEntityCommandBufferSystem _ecbSystem;
 
   protected override void OnCreate() {
     base.OnCreate();
+    _respawnPoints = new NativeList<Translation>(Allocator.Persistent);
     _ecbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
   }
 
   protected override void OnUpdate() {
+    NativeArray<Translation> respawnPoints = _respawnPoints.AsArray();
     var ecb = _ecbSystem.CreateCommandBuffer();
-
-    var respawnPoints = GetEntityQuery(
-      ComponentType.ReadOnly<Translation>(), 
-      ComponentType.ReadOnly<RespawnPoint>())
-      .ToComponentDataArray<Translation>(Allocator.TempJob);
 
     // FIXME(james7132): This has the potential for mulitple players to respawn at the 
     // same point. 
@@ -142,8 +144,21 @@ public class PlayerRespawnSystem : SystemBase {
       player.UnsetFlags(PlayerFlags.EVENT_FLAGS);
     }).Schedule();
 
-    Dependency = respawnPoints.Dispose(Dependency);
     _ecbSystem.AddJobHandleForProducer(this.Dependency);
+  }
+
+  protected override void OnDestroy() {
+    _respawnPoints.Dispose();
+  }
+
+  public void AddRespawnPoint(float3 position) {
+    CompleteDependency();
+    _respawnPoints.Add(new Translation { Value = position });
+  }
+
+  public void Reset() {
+    CompleteDependency();
+    _respawnPoints.Clear();
   }
 
 }

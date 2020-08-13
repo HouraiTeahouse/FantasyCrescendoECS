@@ -15,6 +15,8 @@ public struct ScalableValue {
 }
 
 public struct HitboxState : IComponentData {
+  public Entity Player;
+  public int ID;
   public uint PlayerID;
   public bool Enabled;
   public float3? PreviousPosition;
