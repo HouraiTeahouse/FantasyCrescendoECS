@@ -129,20 +129,23 @@ public class PlayerRespawnSystem : SystemBase {
 
   protected override void OnUpdate() {
     NativeArray<Translation> respawnPoints = _respawnPoints.AsArray();
-    var ecb = _ecbSystem.CreateCommandBuffer();
+    var ecb = _ecbSystem.CreateCommandBuffer().ToConcurrent();
 
     // FIXME(james7132): This has the potential for mulitple players to respawn at the 
     // same point. 
-    Entities.ForEach((Entity entity, ref PlayerComponent player, ref Translation translation) => {
+    Entities
+    .WithName("RespawnPlayers")
+    .WithReadOnly(respawnPoints)
+    .ForEach((Entity entity, int entityInQueryIndex, ref PlayerComponent player, ref Translation translation) => {
       if (player.Is(PlayerFlags.HAS_RESPAWNED)) {
         var idx = player.RNG.NextInt(respawnPoints.Length);
         translation = respawnPoints[idx];
       } else if (player.Is(PlayerFlags.HAS_DIED)) {
         // Disable players that have died without respawning.
-        ecb.AddComponent<Disabled>(entity);
+        ecb.AddComponent<Disabled>(entityInQueryIndex, entity);
       }
       player.UnsetFlags(PlayerFlags.EVENT_FLAGS);
-    }).Schedule();
+    }).ScheduleParallel();
 
     _ecbSystem.AddJobHandleForProducer(this.Dependency);
   }
