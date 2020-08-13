@@ -14,7 +14,7 @@ public class DestroyTemporaryEntities : SystemBase {
   }
 
   protected override void OnUpdate() {
-    var ecb = _ecbSystem.CreateCommandBuffer().ToConcurrent();
+    var ecb = _ecbSystem.CreateCommandBuffer().AsParallelWriter();
     Entities.ForEach((Entity entity, int entityInQueryIndex, ref TimeToLive ttl) => {
       if (ttl.FramesRemaining == 0) {
         ecb.DestroyEntity(entityInQueryIndex, entity);
