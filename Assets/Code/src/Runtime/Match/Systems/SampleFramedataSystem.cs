@@ -1,10 +1,12 @@
-﻿using Unity.Mathematics;
+﻿using Unity.Physics.Systems;
+using Unity.Mathematics;
 using Unity.Entities;
 using Unity.Transforms;
 
 namespace HouraiTeahouse.FantasyCrescendo.Matches {
 
 [UpdateInGroup(typeof(SimulationSystemGroup))]
+[UpdateBefore(typeof(BuildPhysicsWorld))]
 [UpdateBefore(typeof(TransformSystemGroup))]
 public class SampleFrameDataSystem : SystemBase {
 
