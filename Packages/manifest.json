@@ -5,6 +5,7 @@
     "com.houraiteahouse.core": "1.0.1",
     "com.unity.addressables": "1.8.4",
     "com.unity.collab-proxy": "1.2.16",
+    "com.unity.dots.editor": "0.8.2-preview",
     "com.unity.entities": "0.11.1-preview.4",
     "com.unity.ide.rider": "1.1.4",
     "com.unity.ide.vscode": "1.2.1",
