@@ -14,6 +14,22 @@ public struct ScalableValue {
   }
 }
 
+[Serializable]
+public enum HurtboxType : byte {
+  INACTIVE   = 1,
+  INTANGIBLE = 2,
+  INVINCIBLE = 3,
+  GRAZING    = 4,
+  SHIELD     = 5,
+}
+
+[Flags]
+[Serializable]
+public enum HitboxFlags : byte {
+  MIRROR_DIRECTION     = 1 << 0,
+  TRASCENDENT_PRIORITY = 1 << 1,
+}
+
 public struct HitboxState : IComponentData {
   public Entity Player;
   public int ID;
@@ -24,12 +40,27 @@ public struct HitboxState : IComponentData {
 
 [GenerateAuthoringComponent]
 public struct Hitbox : IComponentData {
+  public HitboxFlags Flags;
   public float Radius;
-  public bool MirrorDirection;
+  public uint Priority;
   public ScalableValue Damage;
   public float KnockbackAngle;
   public ScalableValue KnockbackForce;
   public ScalableValue Hitstun;
+
+  public bool Is(HitboxFlags flags) => (Flags & flags) != 0;
+  public void Set(HitboxFlags flags) => Flags = Flags | flags;
+  public void Unset(HitboxFlags flags) => Flags = Flags & ~flags;
+}
+
+[GenerateAuthoringComponent]
+public struct Hurtbox : IComponentData {
+  public bool Enabled => Type != HurtboxType.INACTIVE;
+
+  public Entity Player;
+  public int ID;
+  public uint PlayerID;
+  public HurtboxType Type;
 }
 
 }

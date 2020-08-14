@@ -33,6 +33,9 @@ public class SampleFrameDataSystem : SystemBase {
       var player = state.Player;
       if (!players.HasComponent(player) || !frames.HasComponent(player)) return;
       state.Enabled = frames[state.Player].IsHitboxActive((int)state.ID);
+      if (!state.Enabled) {
+        state.PreviousPosition = null;
+      }
 
       bool validState = GetState(players[player], out CharacterState playerState);
       if (!validState || state.ID >= playerState.Hitboxes.Length) return;
