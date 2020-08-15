@@ -93,7 +93,7 @@ public class HitboxCollisionSystem : SystemBase {
     .WithName("ApplyCollisions")
     .WithReadOnly(collisions)
     .ForEach((Entity entity, ref PlayerComponent player, in PlayerConfig config, in CharacterFrame frame) => {
-      NativeArray<HitboxCollision>? playerCollisions = CopyValuesForKey(collisions, entity);
+      NativeArray<HitboxCollision>? playerCollisions = collisions.CopyValuesForKey(entity);
       if (playerCollisions == null) return;
 
       // Sort collisions
@@ -109,21 +109,6 @@ public class HitboxCollisionSystem : SystemBase {
   static float3 TransformPoint(in float4x4 mat, in float3 p) {
     float4 point = math.mul(mat, new float4(p, 1f));
     return point.xyz * (1f / point.w);
-  }
-
-  static NativeArray<TValue>? CopyValuesForKey<TKey, TValue>(NativeMultiHashMap<TKey, TValue> map, TKey key) 
-                                                             where TKey : struct, IEquatable<TKey>
-                                                             where TValue : struct {
-    if (!map.ContainsKey(key)) return null;
-
-    var count = map.CountValuesForKey(key);
-    var iterator = map.GetValuesForKey(key);
-    var values = new NativeArray<TValue>(count, Allocator.Temp);
-    for (var i = 0; i < count && iterator.MoveNext(); i++) {
-      values[i] = iterator.Current;
-    }
-
-    return values;
   }
 
 }
