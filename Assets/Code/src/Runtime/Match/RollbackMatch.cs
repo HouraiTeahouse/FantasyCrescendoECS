@@ -13,37 +13,57 @@ namespace HouraiTeahouse.FantasyCrescendo.Matches {
 
 public sealed class WorldStorage : IDisposable {
 
-  readonly Dictionary<WorldStorageID, World> _worlds;
-  WorldStorageID _nextId;
+  WorldStorageID _worldId;
+  readonly List<World> _worlds;
+  readonly Queue<WorldStorageID> _pool;
+  readonly HashSet<WorldStorageID> _inactive;
 
-  public WorldStorageID NextID => _nextId;
-  public int Count => _worlds.Count;
+  public int Count => _worlds.Count - _pool.Count;
+  public int TotalCount => _worlds.Count;
 
   public WorldStorage() {
-    _nextId = 0;
-    _worlds = new Dictionary<WorldStorageID, World>();
+    _worlds = new List<World>();
+    _pool = new Queue<WorldStorageID>();
+    _inactive = new HashSet<WorldStorageID>();
   }
 
-  public WorldStorageID Add(World world) {
-    Assert.IsNotNull(world);
-    _worlds[_nextId] = world;
-    return _nextId++;
+  public WorldStorageID Get(out World world) {
+    if (_pool.Count > 0) {
+      WorldStorageID idx = _pool.Dequeue();
+      world = _worlds[(int)idx];
+      _inactive.Remove(idx);
+      return idx;
+    } else {
+      world = new World($"Pool_World_{_worldId++}");
+      _worlds.Add(world);
+      return (uint)(_worlds.Count - 1);
+    }
   }
 
-  public bool TryGetValue(WorldStorageID id, out World world) =>
-    _worlds.TryGetValue(_nextId, out world);
+  public bool TryGetValue(WorldStorageID id, out World world) {
+    bool valid = id >= 0 && id < _worlds.Count && !_inactive.Contains(id);
+    world = valid ? _worlds[(int)id] : null;
+    return valid;
+  }
 
   public void Remove(WorldStorageID id) {
-    if (_worlds.TryGetValue(id, out World world))  {
-      _worlds.Remove(id);
-      world.Dispose();
-    }
+    if (_inactive.Contains(id)) return;
+    _pool.Enqueue(id);
+    _inactive.Add(id);
+    World world = _worlds[(int)id];
+    world.EntityManager.DestroyEntity(world.EntityManager.UniversalQuery);
   }
 
   public void Dispose() {
-    foreach (var world in _worlds.Values) {
-      world.Dispose();
+    foreach (var world in _worlds) {
+      try {
+        world.Dispose();
+      } catch (ArgumentException exec)  {
+      }
     }
+    _worlds.Clear();
+    _pool.Clear();
+    _inactive.Clear();
   }
 
 }
@@ -51,7 +71,7 @@ public sealed class WorldStorage : IDisposable {
 public unsafe abstract class RollbackMatch : Match {
 
   protected BackrollSessionConfig BackrollConfig { get; }
-  protected BackrollSession<PlayerInput> BackrollSession { get; private set; }
+  protected BackrollSession<PlayerInput> Session { get; private set; }
   protected WorldStorage WorldStorage { get; }
 
   public RollbackMatch(MatchConfig config, BackrollSessionConfig backrollConfig,
@@ -69,40 +89,52 @@ public unsafe abstract class RollbackMatch : Match {
 
   public override void Update() {
     // TODO(james7132): Sample local inputs
-    BackrollSession.AdvanceFrame();
+    Session.AdvanceFrame();
     // Timeout is in milliseconds
-    BackrollSession.Idle((int)(Time.fixedDeltaTime * 20000));
+    Session.Idle((int)(Time.fixedDeltaTime * 20000));
   }
   
   protected unsafe override void SampleInputs() {
     // Should be 40 bytes
     var length = UnsafeUtility.SizeOf<PlayerInput>() * MatchConfig.kMaxSupportedPlayers;
     byte* inputs = stackalloc byte[length];
-    BackrollSession.SyncInput(inputs, length);
+    Session.SyncInput(inputs, length);
     InjectInputs(NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<PlayerInput>(inputs, length, Allocator.Temp));
   }
 
-  protected unsafe virtual void Serialize(ref Sync.SavedFrame frame) {
+  protected unsafe void Serialize(ref Sync.SavedFrame frame) {
+    WorldStorageID id = WorldStorage.Get(out World saveState);
+
     EntityManager.BeginExclusiveEntityTransaction();
-    var saveState = new World("Saved_Frame_" + WorldStorage.NextID);
     saveState.EntityManager.CopyAndReplaceEntitiesFrom(EntityManager);
     EntityManager.EndExclusiveEntityTransaction();
 
-    frame.Size = UnsafeUtility.SizeOf<WorldStorageID>();
-    frame.Buffer = (byte*)UnsafeUtility.Malloc(frame.Size, UnsafeUtility.AlignOf<WorldStorageID>(),
-                                               Allocator.Persistent);
-    *((WorldStorageID*)frame.Buffer) = WorldStorage.Add(saveState);
+    frame = new Sync.SavedFrame {
+      // NOTE: THIS IS A HUGE HACK. If this ever gets dereferenced, the
+      // game will hard crash via segmentation fault.
+      Buffer = (byte*)id,
+      // TODO(james7132): Hash the state consistently.
+      Checksum = 0,
+      Size = 0,
+    };
   }
 
-  protected unsafe virtual void Deserialize(void* buffer, int len) {
-    Assert.AreEqual(sizeof(WorldStorageID), len);
-    Assert.IsTrue(WorldStorage.TryGetValue(*(WorldStorageID*)buffer, out World world));
+  protected unsafe void Deserialize(void* buffer, int len) {
+    // NOTE: THIS IS A HUGE HACK. If this ever gets dereferenced, the
+    // game will hard crash via segmentation fault.
+    Assert.IsTrue(WorldStorage.TryGetValue((WorldStorageID)buffer, out World world));
+    Assert.IsTrue(len == 0);
     EntityManager.CopyAndReplaceEntitiesFrom(World.EntityManager);
   }
 
-  protected unsafe virtual void ReleaseWorld(IntPtr buffer) {
-    WorldStorage.Remove(*(WorldStorageID*)buffer);
-    UnsafeUtility.Free((void*)buffer, Allocator.Persistent);
+  protected unsafe void ReleaseWorld(IntPtr buffer) {
+    // NOTE: THIS IS A HUGE HACK. If this ever gets dereferenced, the
+    // game will hard crash via segmentation fault.
+    WorldStorage.Remove((WorldStorageID)buffer);
+  }
+
+  protected virtual BackrollSession<PlayerInput> CreateBackrollSession() {
+    return HouraiTeahouse.Backroll.Backroll.StartSession<PlayerInput>(BackrollConfig);
   }
 
 }
