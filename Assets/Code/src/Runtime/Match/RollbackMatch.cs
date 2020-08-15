@@ -102,7 +102,7 @@ public sealed class WorldPool : IDisposable {
   /// Deactivates all active worlds and returns them to the pool.
   /// </summary>
   public void Clear() {
-    for (var i = 0; i < _worlds.Count; i++) {
+    for (uint i = 0; i < _worlds.Count; i++) {
       Remove(i);
     }
   }
@@ -132,7 +132,7 @@ public unsafe abstract class RollbackMatch : Match {
 
   public RollbackMatch(MatchConfig config, BackrollSessionConfig backrollConfig,
                        World world = null) : base(config, world) {
-    SavedStates = SavedStates.Instance;
+    SavedStates = WorldPool.Instance;
     backrollConfig.Callbacks = new BackrollSessionCallbacks {
       SaveGameState = Serialize,
       LoadGameState = Deserialize,
@@ -151,7 +151,7 @@ public unsafe abstract class RollbackMatch : Match {
   }
 
   public override void Dispose() {
-    base.Dipose();
+    base.Dispose();
     SavedStates.Clear();
   }
   
