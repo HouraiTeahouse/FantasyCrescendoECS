@@ -19,6 +19,10 @@ public class InjectInputsSystem : SystemBase {
     }).Schedule();
   }
 
+  protected override void OnDestroy() {
+    _inputs.Dispose();
+  }
+
   public void SetPlayerInput(int playerId, in PlayerInput input) {
     Assert.IsTrue(playerId >= 0 && playerId < MatchConfig.kMaxSupportedPlayers);
     CompleteDependency();
