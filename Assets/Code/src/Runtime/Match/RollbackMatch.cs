@@ -7,29 +7,51 @@ using Unity.Assertions;
 using Unity.Entities;
 using Time = UnityEngine.Time;
 
-using WorldStorageID = System.UInt32;
+using WorldPoolID = System.UInt32;
 
 namespace HouraiTeahouse.FantasyCrescendo.Matches {
 
-public sealed class WorldStorage : IDisposable {
+/// <summary>
+/// A managed pool of ECS Worlds. Useful for saving multiple snapshots
+/// of a world.
+/// </summary>
+public sealed class WorldPool : IDisposable {
 
-  WorldStorageID _worldId;
+  /// <summary>
+  /// A singleton instance.
+  /// </summary>
+  public static readonly WorldPool Instance = new WorldPool();
+
+  WorldPoolID _worldId;
   readonly List<World> _worlds;
-  readonly Queue<WorldStorageID> _pool;
-  readonly HashSet<WorldStorageID> _inactive;
+  readonly Queue<WorldPoolID> _pool;
+  readonly HashSet<WorldPoolID> _inactive;
 
+  /// <summary>
+  /// The total number of active worlds.
+  /// </summary>
   public int Count => _worlds.Count - _pool.Count;
+
+  /// <summary>
+  /// The total number of worlds, including inactive ones.
+  /// </summary>
   public int TotalCount => _worlds.Count;
 
-  public WorldStorage() {
+  public WorldPool() {
     _worlds = new List<World>();
-    _pool = new Queue<WorldStorageID>();
-    _inactive = new HashSet<WorldStorageID>();
+    _pool = new Queue<WorldPoolID>();
+    _inactive = new HashSet<WorldPoolID>();
   }
 
-  public WorldStorageID Get(out World world) {
+  /// <summary>
+  /// Gets a free world from the storage. If a free World does not exist in 
+  /// the internal pool, a new one will be created.
+  /// </summary>
+  /// <param name="world">an out parameter for the fetched World.</param>
+  /// <returns>the ID for the World</returns>
+  public WorldPoolID Get(out World world) {
     if (_pool.Count > 0) {
-      WorldStorageID idx = _pool.Dequeue();
+      WorldPoolID idx = _pool.Dequeue();
       world = _worlds[(int)idx];
       _inactive.Remove(idx);
       return idx;
@@ -40,20 +62,54 @@ public sealed class WorldStorage : IDisposable {
     }
   }
 
-  public bool TryGetValue(WorldStorageID id, out World world) {
-    bool valid = id >= 0 && id < _worlds.Count && !_inactive.Contains(id);
+  /// <summary>
+  /// Tries to get an active World from the storage.
+  /// </summary>
+  /// <param name="id">the ID of the world to fetch</param>
+  /// <param name="world">an out parameter for the fetched World. Will be null if there wasn't one found.</param>
+  /// <returns>true if an world was found, false if no World exists or was inactive.</returns>
+  public bool TryGetValue(WorldPoolID id, out World world) {
+    bool valid = IsActive(id);
     world = valid ? _worlds[(int)id] : null;
     return valid;
   }
 
-  public void Remove(WorldStorageID id) {
-    if (_inactive.Contains(id)) return;
-    _pool.Enqueue(id);
-    _inactive.Add(id);
-    World world = _worlds[(int)id];
-    world.EntityManager.DestroyEntity(world.EntityManager.UniversalQuery);
+  /// <summary>
+  /// Gets if 
+  /// </summary>
+  /// <param name="id"></param>
+  /// <returns></returns>
+  public bool IsActive(WorldPoolID id) {
+    return id >= 0 && id < _worlds.Count && !_inactive.Contains(id);
   }
 
+  /// <summary>
+  /// Removes a world from the active set of Worlds based on it's ID.
+  /// It will return the world to the inactive pool and delete all entities
+  /// from the world.
+  /// A noop if the ID does not correspond to an active world.
+  /// </summary>
+  /// <param name="id">the ID of the world to </param>
+  public void Remove(WorldPoolID id) {
+    if (!IsActive(id)) return;
+    _pool.Enqueue(id);
+    _inactive.Add(id);
+    EntityManager manager = _worlds[(int)id].EntityManager;
+    manager.DestroyEntity(manager.UniversalQuery);
+  }
+
+  /// <summary>
+  /// Deactivates all active worlds and returns them to the pool.
+  /// </summary>
+  public void Clear() {
+    for (var i = 0; i < _worlds.Count; i++) {
+      Remove(i);
+    }
+  }
+
+  /// <summary>
+  /// Dispose of the storage and all of the Worlds managed by the storage.
+  /// </summary>
   public void Dispose() {
     foreach (var world in _worlds) {
       try {
@@ -72,11 +128,11 @@ public unsafe abstract class RollbackMatch : Match {
 
   protected BackrollSessionConfig BackrollConfig { get; }
   protected BackrollSession<PlayerInput> Session { get; private set; }
-  protected WorldStorage WorldStorage { get; }
+  protected WorldPool SavedStates { get; }
 
   public RollbackMatch(MatchConfig config, BackrollSessionConfig backrollConfig,
                        World world = null) : base(config, world) {
-    WorldStorage = new WorldStorage();
+    SavedStates = SavedStates.Instance;
     backrollConfig.Callbacks = new BackrollSessionCallbacks {
       SaveGameState = Serialize,
       LoadGameState = Deserialize,
@@ -93,6 +149,11 @@ public unsafe abstract class RollbackMatch : Match {
     // Timeout is in milliseconds
     Session.Idle((int)(Time.fixedDeltaTime * 20000));
   }
+
+  public override void Dispose() {
+    base.Dipose();
+    SavedStates.Clear();
+  }
   
   protected unsafe override void SampleInputs() {
     // Should be 40 bytes
@@ -103,7 +164,7 @@ public unsafe abstract class RollbackMatch : Match {
   }
 
   protected unsafe void Serialize(ref Sync.SavedFrame frame) {
-    WorldStorageID id = WorldStorage.Get(out World saveState);
+    WorldPoolID id = SavedStates.Get(out World saveState);
 
     EntityManager.BeginExclusiveEntityTransaction();
     saveState.EntityManager.CopyAndReplaceEntitiesFrom(EntityManager);
@@ -122,7 +183,7 @@ public unsafe abstract class RollbackMatch : Match {
   protected unsafe void Deserialize(void* buffer, int len) {
     // NOTE: THIS IS A HUGE HACK. If this ever gets dereferenced, the
     // game will hard crash via segmentation fault.
-    Assert.IsTrue(WorldStorage.TryGetValue((WorldStorageID)buffer, out World world));
+    Assert.IsTrue(SavedStates.TryGetValue((WorldPoolID)buffer, out World world));
     Assert.IsTrue(len == 0);
     EntityManager.CopyAndReplaceEntitiesFrom(World.EntityManager);
   }
@@ -130,7 +191,10 @@ public unsafe abstract class RollbackMatch : Match {
   protected unsafe void ReleaseWorld(IntPtr buffer) {
     // NOTE: THIS IS A HUGE HACK. If this ever gets dereferenced, the
     // game will hard crash via segmentation fault.
-    WorldStorage.Remove((WorldStorageID)buffer);
+    var id = (WorldPoolID)buffer;
+    Assert.IsTrue(SavedStates.IsActive(id));
+    SavedStates.Remove(id);
+    Assert.IsTrue(!SavedStates.IsActive(id));
   }
 
   protected virtual BackrollSession<PlayerInput> CreateBackrollSession() {
