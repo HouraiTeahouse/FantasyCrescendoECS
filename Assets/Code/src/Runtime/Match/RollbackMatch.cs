@@ -130,8 +130,11 @@ public unsafe abstract class RollbackMatch : Match {
   protected BackrollSession<PlayerInput> Session { get; private set; }
   protected WorldPool SavedStates { get; }
 
+  readonly HashWorldSystem _hasher;
+
   public RollbackMatch(MatchConfig config, BackrollSessionConfig backrollConfig,
                        World world = null) : base(config, world) {
+    _hasher = World.GetOrCreateSystem<HashWorldSystem>();
     SavedStates = WorldPool.Instance;
     backrollConfig.Callbacks = new BackrollSessionCallbacks {
       SaveGameState = Serialize,
@@ -170,14 +173,18 @@ public unsafe abstract class RollbackMatch : Match {
     saveState.EntityManager.CopyAndReplaceEntitiesFrom(EntityManager);
     EntityManager.EndExclusiveEntityTransaction();
 
-    frame = new Sync.SavedFrame {
-      // NOTE: THIS IS A HUGE HACK. If this ever gets dereferenced, the
-      // game will hard crash via segmentation fault.
-      Buffer = (byte*)id,
-      // TODO(james7132): Hash the state consistently.
-      Checksum = 0,
-      Size = 0,
-    };
+    // Get the hash and reduce
+    ulong hash = _hasher.GetWorldHash();
+    unchecked {
+      frame = new Sync.SavedFrame {
+        // NOTE: THIS IS A HUGE HACK. If this ever gets dereferenced, the
+        // game will hard crash via segmentation fault.
+        Buffer = (byte*)id,
+        // Reduce the 64 bit hash by XORing the top 32 bits with the bottom 32
+        Checksum = (int)((hash & 0xffffffff) ^ ((hash >> 32) & 0xffffffff)),
+        Size = 0,
+      };
+    }
   }
 
   protected unsafe void Deserialize(void* buffer, int len) {
