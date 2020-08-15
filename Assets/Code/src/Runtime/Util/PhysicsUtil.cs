@@ -6,25 +6,24 @@ using Unity.Physics.Systems;
 
 namespace HouraiTeahouse.FantasyCrescendo.Utils {
 
-public static class PhysicsUtil {
+public enum PhysicsLayers : uint {
+  /// <summary>
+  /// Used for hitboxes and hurtboxes.
+  /// Only collides with others of the same layer.
+  /// </summary>
+  HITBOX          = 1 << 0,
 
-  public static unsafe void SphereCast(in PhysicsWorld world, float3 from, float3 to, float radius, 
-                                       ref NativeList<ColliderCastHit> hits) {
-    BlobAssetReference<Collider> collider = SphereCollider.Create(new SphereGeometry {
-      Center = float3.zero,
-      Radius = radius
-    });
+  /// <summary>
+  /// Used for characters's environment collision boxes.
+  /// Collides with environment geometry and selectively
+  /// other characters.
+  /// </summary>
+  CHARACTER       = 1 << 3,
 
-    world.CastCollider(new ColliderCastInput {
-      Collider = (Collider*)collider.GetUnsafePtr(),
-      Start = from,
-      End = to,
-      Orientation = float4.zero
-    }, ref hits);
-
-    collider.Dispose();
-  }
-
+  /// <summary>
+  /// Used for the environment.
+  /// </summary>
+  STAGE           = 1 << 4,
 }
 
 }

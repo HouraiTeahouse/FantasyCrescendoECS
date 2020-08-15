@@ -1,6 +1,5 @@
 using HouraiTeahouse.FantasyCrescendo.Utils;
 using System;
-using UnityEngine;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -44,11 +43,11 @@ public class HitboxCollisionSystem : SystemBase {
       Allocator.Persistent);
   }
 
-  protected override void OnUpdate() {
+  protected unsafe override void OnUpdate() {
     PhysicsWorld physicsWorld = _worldBuildSystem.PhysicsWorld;
-    _collisions.Clear();
     NativeMultiHashMap<Entity, HitboxCollision> collisions = _collisions;
-    var collisionWriter = _collisions.AsParallelWriter();
+    collisions.Clear();
+    var collisionWriter = collisions.AsParallelWriter();
     var hurtboxes = GetComponentDataFromEntity<Hurtbox>(true);
 
     Entities
@@ -60,8 +59,18 @@ public class HitboxCollisionSystem : SystemBase {
 
       float3 position = TransformPoint(transform.Value, float3.zero);
       var hits = new NativeList<ColliderCastHit>(Allocator.Temp);
-      PhysicsUtil.SphereCast(physicsWorld, state.PreviousPosition ?? position, position, 
-                             hitbox.Radius, ref hits);
+      physicsWorld.CastCollider(new ColliderCastInput {
+        Collider = (Collider*)SphereCollider.Create(new SphereGeometry {
+          Center = float3.zero,
+          Radius = hitbox.Radius
+        }, new CollisionFilter {
+          BelongsTo = (uint)PhysicsLayers.HITBOX,
+          CollidesWith = (uint)PhysicsLayers.HITBOX,
+        }).GetUnsafePtr(),
+        Start = state.PreviousPosition ?? position,
+        End = position,
+        Orientation = float4.zero
+      }, ref hits);
       state.PreviousPosition = position;
 
       for (var i = 0; i < hits.Length; i++) {
@@ -90,7 +99,7 @@ public class HitboxCollisionSystem : SystemBase {
       // Sort collisions
       playerCollisions.Value.Sort();
 
-    }).ScheduleParallel();
+    }).Schedule();
   }
 
   protected override void OnDestroy() {
