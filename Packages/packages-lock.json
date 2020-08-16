@@ -156,10 +156,11 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.inputsystem": {
-      "version": "file:com.unity.inputsystem@1.0.0",
+      "version": "1.0.0",
       "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
     },
     "com.unity.jobs": {
       "version": "0.2.10-preview.12",
