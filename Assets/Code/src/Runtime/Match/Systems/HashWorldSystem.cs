@@ -66,8 +66,7 @@ public class HashWorldSystem : SystemBase {
 
   public unsafe Hash GetWorldHash() {
     CompleteDependency();
-    return XXHash.Hash64((byte*)_result.GetUnsafeReadOnlyPtr(),
-                         kMaxIndex * sizeof(Hash));
+    return _result.XXHash64();
   }
 
   public Hash[] GetComponentHashes() {
@@ -116,7 +115,7 @@ public class HashWorldSystem : SystemBase {
     [ReadOnly] public NativeMultiHashMap<int, HashResult> Results;
     public NativeArray<Hash> Output;
 
-    public unsafe void Execute(int idx) {
+    public void Execute(int idx) {
         NativeArray<HashResult>? slice = Results.CopyValuesForKey(idx);
         if (slice == null) {
           Output[idx] = 0;
@@ -128,7 +127,7 @@ public class HashWorldSystem : SystemBase {
         for (var j = 0; j < hashes.Length; j++) {
           hashes[j] = results[j].Hash;
         }
-        Output[idx] = XXHash.Hash64((byte*)hashes.GetUnsafeReadOnlyPtr(), hashes.Length * sizeof(Hash));
+        Output[idx] = hashes.XXHash64();
     }
   }
 
