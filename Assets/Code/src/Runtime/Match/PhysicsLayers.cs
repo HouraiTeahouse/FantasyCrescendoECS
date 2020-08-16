@@ -4,7 +4,7 @@ using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Systems;
 
-namespace HouraiTeahouse.FantasyCrescendo.Utils {
+namespace HouraiTeahouse.FantasyCrescendo.Matches {
 
 public enum PhysicsLayers : uint {
   /// <summary>

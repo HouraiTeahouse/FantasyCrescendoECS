@@ -1,5 +1,4 @@
-﻿using HouraiTeahouse.FantasyCrescendo.Core;
-using System;
+﻿using System;
 using TMPro;
 using UnityEngine;
 

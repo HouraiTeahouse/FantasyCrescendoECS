@@ -1,5 +1,4 @@
-﻿using HouraiTeahouse.FantasyCrescendo.Core;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace HouraiTeahouse.FantasyCrescendo.Matches {
 

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace HouraiTeahouse.FantasyCrescendo.Core {
+namespace HouraiTeahouse.FantasyCrescendo.Configs {
 
 [CreateAssetMenu(fileName = "Fantasy Crescendo/Config/VisualConfig")]
 public class VisualConfig : ScriptableObject {

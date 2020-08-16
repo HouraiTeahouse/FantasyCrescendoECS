@@ -1,4 +1,4 @@
-﻿using HouraiTeahouse.FantasyCrescendo.Core;
+﻿using HouraiTeahouse.FantasyCrescendo.Configs;
 using HouraiTeahouse.FantasyCrescendo.Utils;
 using UnityEngine;
 using UnityEngine.Assertions;
