@@ -30,51 +30,33 @@ public class HashWorldSystem : SystemBase {
     public int CompareTo(HashResult other) => ID.CompareTo(other.ID);
   }
 
-  const int kMaxIndex = 6;
+  const int kMaxIndex = 7;
   NativeArray<Hash> _result;
 
   protected override void OnCreate() {
     _result = new NativeArray<Hash>(kMaxIndex, Allocator.Persistent);
   }
 
-  protected unsafe override void OnUpdate() {
+  protected override void OnUpdate() {
     int entityCount = EntityManager.Debug.EntityCount;
     var results = new NativeMultiHashMap<int, HashResult>(entityCount * kMaxIndex, Allocator.TempJob);
     var writer = results.AsParallelWriter();
+
     var jobs = new NativeArray<JobHandle>(kMaxIndex, Allocator.Temp);
     var idx = 0;
     jobs[idx] = HashComponents<PlayerComponent>(idx++, writer);
     jobs[idx] = HashComponents<Translation>(idx++, writer);
     jobs[idx] = HashComponents<Rotation>(idx++, writer);
     jobs[idx] = HashComponents<Scale>(idx++, writer);
+    jobs[idx] = HashComponents<HitboxState>(idx++, writer);
     jobs[idx] = HashComponents<Hitbox>(idx++, writer);
     jobs[idx] = HashComponents<Hurtbox>(idx++, writer);
     Dependency = JobHandle.CombineDependencies(jobs);
 
-    NativeArray<Hash> finalResult = _result;
-    for (var i = 0; i < kMaxIndex; i++) {
-      jobs[i] = Job
-      .WithName("CollectHashes")
-      .WithNativeDisableContainerSafetyRestriction(results)
-      .WithNativeDisableContainerSafetyRestriction(finalResult)
-      .WithCode(() => {
-        NativeArray<HashResult>? slice = results.CopyValuesForKey(i);
-        if (slice == null) {
-          finalResult[i] = 0;
-          return;
-        }
-
-        var hashResults = slice.Value;
-        var hashes = new NativeArray<Hash>(hashResults.Length, Allocator.Temp);
-        hashResults.Sort();
-        for (var j = 0; j < hashResults.Length; j++) {
-          hashes[j] = hashResults[j].Hash;
-        }
-        finalResult[i] = XXHash.Hash64((byte*)hashes.GetUnsafeReadOnlyPtr(), 
-                                              entityCount * sizeof(Hash));
-      }).Schedule(Dependency);
-    }
-    Dependency = JobHandle.CombineDependencies(jobs);
+    Dependency = new CollectHashes {
+      Results = results,
+      Output = _result
+    }.Schedule(_result.Length, 1, Dependency);
     results.Dispose(Dependency);
   }
 
@@ -88,8 +70,16 @@ public class HashWorldSystem : SystemBase {
                          kMaxIndex * sizeof(Hash));
   }
 
+  public Hash[] GetComponentHashes() {
+    CompleteDependency();
+    var hashes = new Hash[kMaxIndex];
+    _result.CopyTo(hashes);
+    return hashes;
+  }
+
   unsafe JobHandle HashComponents<T>(int index,  NativeMultiHashMap<int, HashResult>.ParallelWriter writer) 
                                      where T : struct, IComponentData {
+    Assert.IsTrue(index >= 0 && index < kMaxIndex);
     var query = GetEntityQuery(ComponentType.ReadOnly<T>());
     return new HashComponentsJob<T> {
       Index = index,
@@ -119,7 +109,27 @@ public class HashWorldSystem : SystemBase {
         });
       }
     }
+  }
 
+  [BurstCompile]
+  struct CollectHashes : IJobParallelFor {
+    [ReadOnly] public NativeMultiHashMap<int, HashResult> Results;
+    public NativeArray<Hash> Output;
+
+    public unsafe void Execute(int idx) {
+        NativeArray<HashResult>? slice = Results.CopyValuesForKey(idx);
+        if (slice == null) {
+          Output[idx] = 0;
+          return;
+        }
+        var results = slice.Value;
+        results.Sort();
+        var hashes = new NativeArray<Hash>(results.Length, Allocator.Temp);
+        for (var j = 0; j < hashes.Length; j++) {
+          hashes[j] = results[j].Hash;
+        }
+        Output[idx] = XXHash.Hash64((byte*)hashes.GetUnsafeReadOnlyPtr(), hashes.Length * sizeof(Hash));
+    }
   }
 
 }

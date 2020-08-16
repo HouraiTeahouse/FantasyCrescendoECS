@@ -58,7 +58,29 @@ public abstract class Match : IDisposable {
     World.PopTime();
   }
 
-  public virtual void Update() => Step();
+  public virtual void Update() {
+    var hasher = World.GetOrCreateSystem<HashWorldSystem>();
+    var id = WorldPool.Instance.Get(out World saveState);
+    saveState.EntityManager.CopyAndReplaceEntitiesFrom(EntityManager);
+    hasher.Update();
+    ulong[] beforeHash = hasher.GetComponentHashes();
+    Step();
+    ulong[] hash = hasher.GetComponentHashes();
+    EntityManager.CopyAndReplaceEntitiesFrom(saveState.EntityManager);
+    hasher.Update();
+    ulong[] beforeHash2 = hasher.GetComponentHashes();
+    Step();
+    ulong[] hash2 = hasher.GetComponentHashes();
+    for (var i = 0; i < hash2.Length; i++) {
+      if (beforeHash[i] == beforeHash2[i]) continue;
+      Debug.Log($"BEFORE Component Difference at {i}: {beforeHash[i]} {beforeHash2[i]}");
+    }
+    for (var i = 0; i < hash2.Length; i++) {
+      if (hash[i] == hash2[i]) continue;
+      Debug.Log($"AFTER Component Difference at {i}: {hash[i]} {hash2[i]}");
+    }
+    WorldPool.Instance.Remove(id);
+  }
   public virtual void Dispose() {
     _blobAssetStore?.Dispose();
     _blobAssetStore = null;
