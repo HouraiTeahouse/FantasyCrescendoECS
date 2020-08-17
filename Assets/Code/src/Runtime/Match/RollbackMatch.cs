@@ -124,7 +124,7 @@ public sealed class WorldPool : IDisposable {
 
 }
 
-public unsafe abstract class RollbackMatch : Match {
+public unsafe abstract class RollbackMatch : RecordableMatch {
 
   protected BackrollSessionConfig BackrollConfig { get; }
   protected BackrollSession<PlayerInput> Session { get; private set; }
