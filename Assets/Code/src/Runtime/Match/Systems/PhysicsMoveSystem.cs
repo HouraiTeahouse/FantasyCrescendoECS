@@ -8,95 +8,66 @@ using Unity.Jobs;
 using Unity.Physics;
 using Unity.Physics.Systems;
 using Unity.Mathematics;
-public class PhysicsMoveSystem : JobComponentSystem
-{
 
-    protected override JobHandle OnUpdate(JobHandle jobDeps)
-    {
+public class PhysicsMoveSystem : SystemBase {
+
+    protected override void OnUpdate() {
         float deltaTime = Time.fixedDeltaTime;
-
         float curInput = (Keyboard.current.aKey.isPressed) ? -1 : (Keyboard.current.dKey.isPressed) ? 1 : 0;
 
-        Entities.ForEach((ref PhysicsMoveData moveData, ref PhysicsVelocity vel) =>
-        {
+        Entities
+        .WithoutBurst()
+        .ForEach((ref PhysicsMoveData moveData, ref PhysicsVelocity vel) => {
             float3 newVel = vel.Linear;
 
             //if the player wants to move
-            if (curInput != 0)
-            {
+            if (curInput != 0) {
                 //velocity controller to make sure that the assigned velocity value isn't over the maximum velocity
-                if (Mathf.Abs(newVel.x + curInput * moveData.moveSpeed) >= moveData.maxSpeed)
-                {
+                if (Mathf.Abs(newVel.x + curInput * moveData.moveSpeed) >= moveData.maxSpeed) {
                     newVel.x = curInput * moveData.maxSpeed;
-                }
-                else
-                {
+                } else {
                     newVel.x += curInput * moveData.moveSpeed;
                 }
 
                 //changes left or right facing
-                if (curInput >= 0)
-                {
+                if (curInput >= 0) {
                     moveData.facing = 1;
-
-                }
-                else
-                {
+                } else {
                     moveData.facing = -1;
-
                 }
-            }
             //if the player doesn't want to move
-            else
-            {
-                if (Mathf.Abs(newVel.x) - moveData.groundedFriction <= 0)
-                {
+            } else {
+                if (Mathf.Abs(newVel.x) - moveData.groundedFriction <= 0) {
                     newVel.x = 0;
-                }
-                else
-                {
+                } else {
                     //assigns the direction friction is applied by going in the opposite direction as the current velocity
                     int resistDir = (newVel.x < 0) ? 1 : -1;
                     newVel.x += resistDir * moveData.groundedFriction;
                 }
-
             }
 
-            if (newVel.y < 0 && Keyboard.current.sKey.isPressed)
-            {
+            if (newVel.y < 0 && Keyboard.current.sKey.isPressed) {
                 //velocity controller to make sure that the assigned velocity value isn't over the maximum velocity
-                if (newVel.y + moveData.weight * -2 <= -moveData.maxFastFallSpeed)
-                {
+                if (newVel.y + moveData.weight * -2 <= -moveData.maxFastFallSpeed) {
                     newVel.y = -moveData.maxFastFallSpeed;
-                }
-                else
-                {
+                } else {
                     newVel.y += moveData.weight * -2;
                 }
-            }
-            else
-            {
+            } else {
                 //velocity controller to make sure that the assigned velocity value isn't over the maximum velocity
-                if (newVel.y + moveData.weight * -1 <= -moveData.maxFallSpeed)
-                {
+                if (newVel.y + moveData.weight * -1 <= -moveData.maxFallSpeed) {
                     newVel.y = -moveData.maxFallSpeed;
-                }
-                else
-                {
+                } else {
                     newVel.y += moveData.weight * -1;
                 }
             }
 
-            if (Keyboard.current.wKey.isPressed)
-            {
+            if (Keyboard.current.wKey.isPressed) {
                 newVel.y = 10;
             }
 
             vel.Linear = newVel;
-
         }).Run();
-
-        return default;
     }
 
     /*void SnapToGround(ref PlayerState state) {

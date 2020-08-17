@@ -200,7 +200,7 @@ public abstract class RecordableMatch : DefaultMatch {
 
   protected override void InjectInputs(NativeArray<PlayerInput> inputs) {
     base.InjectInputs(inputs);
-    _writer?.WriteInputs(inputs.AsReadOnlySpan());
+    _writer?.WriteInputs(inputs);
   }
 
   protected virtual string GetReplayFilename() {
@@ -230,7 +230,7 @@ public sealed class ReplayMatch : DefaultMatch {
 
   protected override void SampleInputs() {
     var inputs = MatchConfig.CreateNativePlayerBuffer<PlayerInput>(Allocator.Temp);
-    _reader.ReadInputs(inputs.AsSpan());
+    _reader.ReadInputs(inputs);
     InjectInputs(inputs);
   }
 

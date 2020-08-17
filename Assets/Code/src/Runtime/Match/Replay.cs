@@ -2,6 +2,7 @@
 using Unity.Assertions;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Core;
+using Unity.Collections;
 using Unity.Entities.Serialization;
 
 namespace HouraiTeahouse.FantasyCrescendo.Matches {
@@ -34,14 +35,12 @@ public sealed class ReplayWriter : IDisposable {
   /// Writes a frame of input to the file.
   /// </summary>
   /// <param name="inputs">a frame of input to write.</param>
-  public unsafe void WriteInputs(ReadOnlySpan<PlayerInput> inputs) {
+  public unsafe void WriteInputs(NativeArray<PlayerInput> inputs) {
     Assert.IsTrue(inputs.Length == MatchConfig.kMaxSupportedPlayers);
-    fixed (PlayerInput* inputPtr = inputs) {
-      var ptr = (byte*)inputPtr;
-      int size = MatchConfig.kMaxSupportedPlayers * UnsafeUtility.SizeOf<PlayerInput>();
-      _writer.Write(XXHash.Hash64(ptr, size));
-      _writer.WriteBytes(ptr, size);
-    }
+    var ptr = (byte*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(inputs);
+    int size = MatchConfig.kMaxSupportedPlayers * UnsafeUtility.SizeOf<PlayerInput>();
+    _writer.Write(XXHash.Hash64(ptr, size));
+    _writer.WriteBytes(ptr, size);
   }
 
   /// <summary>
@@ -74,16 +73,14 @@ public sealed class ReplayReader : IDisposable {
   /// Reads a frame of input to the file.
   /// </summary>
   /// <param name="inputs">a frame of input to read.</param>
-  public unsafe void ReadInputs(Span<PlayerInput> inputs) {
+  public unsafe void ReadInputs(NativeArray<PlayerInput> inputs) {
     Assert.IsTrue(inputs.Length == MatchConfig.kMaxSupportedPlayers);
-    fixed (PlayerInput* inputPtr = inputs) {
-      var ptr = (byte*)inputPtr;
-      int size = MatchConfig.kMaxSupportedPlayers * UnsafeUtility.SizeOf<PlayerInput>();
-      ulong checksum = _reader.ReadULong();
-      _reader.ReadBytes(ptr, size);
-      ulong hash = XXHash.Hash64(ptr, size);
-      Assert.AreEqual(checksum, hash);
-    }
+    var ptr = (byte*)NativeArrayUnsafeUtility.GetUnsafePtr(inputs);
+    int size = MatchConfig.kMaxSupportedPlayers * UnsafeUtility.SizeOf<PlayerInput>();
+    ulong checksum = _reader.ReadULong();
+    _reader.ReadBytes(ptr, size);
+    ulong hash = XXHash.Hash64(ptr, size);
+    Assert.AreEqual(checksum, hash);
   }
 
   /// <summary>
