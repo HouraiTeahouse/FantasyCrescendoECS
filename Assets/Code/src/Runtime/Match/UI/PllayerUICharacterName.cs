@@ -9,9 +9,11 @@ public class PllayerUICharacterName : MonoBehaviour, IView<PlayerUIData> {
 
   uint? _characterId;
 
+#pragma warning disable 0649
   [SerializeField] TMP_Text _text;
   [SerializeField] NameChoice _name;
   [SerializeField] Case _caseChange;
+#pragma warning restore 0649
 
   enum NameChoice {
     Short, Long

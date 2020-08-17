@@ -16,7 +16,9 @@ public class DataLoader : MonoBehaviour {
 
   static TaskCompletionSource<object> _loading = new TaskCompletionSource<object>();
 
+#pragma warning disable 0649
   [SerializeField] AssetLabelReference[] LoadedLabels;
+#pragma warning restore 0649
 
   static Type[] ValidImportTypes = new [] {
     typeof(SceneData),

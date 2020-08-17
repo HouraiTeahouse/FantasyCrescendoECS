@@ -114,7 +114,7 @@ public sealed class WorldPool : IDisposable {
     foreach (var world in _worlds) {
       try {
         world.Dispose();
-      } catch (ArgumentException exec)  {
+      } catch (ArgumentException)  {
       }
     }
     _worlds.Clear();

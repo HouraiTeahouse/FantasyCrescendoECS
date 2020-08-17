@@ -198,7 +198,7 @@ public abstract class RecordableMatch : DefaultMatch {
     // FIXME: This should write the MatchConfig here.
   }
 
-  protected virtual void InjectInputs(NativeArray<PlayerInput> inputs) {
+  protected override void InjectInputs(NativeArray<PlayerInput> inputs) {
     base.InjectInputs(inputs);
     _writer?.WriteInputs(inputs.AsReadOnlySpan());
   }

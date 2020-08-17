@@ -23,6 +23,7 @@ public class MatchUITimer : MonoBehaviour {
     }
     var seconds = Mathf.FloorToInt(ticks * Time.fixedDeltaTime);
     if (_seconds == seconds) return;
+    _seconds = seconds;
     var minutes = seconds / 60;
     seconds = seconds % 60;
     _text.text = $"{minutes:D2}:{seconds:D2}";
