@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace HouraiTeahouse.FantasyCrescendo.Core {
+namespace HouraiTeahouse.FantasyCrescendo {
 
 public interface IView<T> {
   void UpdateView(in T model);

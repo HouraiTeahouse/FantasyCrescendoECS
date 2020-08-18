@@ -1,5 +1,6 @@
-﻿using HouraiTeahouse.FantasyCrescendo.Core;
+﻿using HouraiTeahouse.FantasyCrescendo.Configs;
 using HouraiTeahouse.FantasyCrescendo.Utils;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.InputSystem;
@@ -78,11 +79,8 @@ public class PlayerInputWatcher : MonoBehaviour {
 
   InputAction movementAction;
   InputAction strongAction;
-  InputAction attackAction;
-  InputAction specialAction;
-  InputAction jumpAction;
-  InputAction grabAction;
-  InputAction shieldAction;
+
+  Dictionary<PlayerInput.Button, InputAction> _buttons;
 
   void Awake() {
     Assert.IsNotNull(_inputSource);
@@ -94,11 +92,13 @@ public class PlayerInputWatcher : MonoBehaviour {
     InputActionAsset actions =_inputSource.actions;
     movementAction = actions[_movementAction];
     strongAction = actions[_strongAction];
-    attackAction = actions[_attackAction];
-    specialAction = actions[_specialAction];
-    jumpAction = actions[_jumpAction];
-    grabAction = actions[_grabAction];
-    shieldAction = actions[_shieldAction];
+
+    _buttons = new Dictionary<PlayerInput.Button, InputAction>();
+    _buttons[PlayerInput.Button.ATTACK] = actions[_attackAction];
+    _buttons[PlayerInput.Button.SPECIAL] = actions[_shieldAction];
+    _buttons[PlayerInput.Button.JUMP] = actions[_jumpAction];
+    _buttons[PlayerInput.Button.GRAB] = actions[_grabAction];
+    _buttons[PlayerInput.Button.SHIELD] = actions[_shieldAction];
   }
 
   void OnDestroy() {
@@ -106,15 +106,16 @@ public class PlayerInputWatcher : MonoBehaviour {
   }
 
   public PlayerInput GetLatestInputs() {
-    InputActionAsset actions =_inputSource.actions;
+    var buttons = (PlayerInput.Button)0;
+    foreach (var kvp in _buttons) {
+      if (kvp.Value.ReadValue<bool>()) {
+        buttons |= kvp.Key;
+      }
+    }
     return new PlayerInput {
+      Buttons = buttons,
       Movement = (Vector2b)movementAction.ReadValue<Vector2>(),
       Smash    = (Vector2b)strongAction.ReadValue<Vector2>(),
-      Attack   = attackAction.ReadValue<bool>(),
-      Special  = specialAction.ReadValue<bool>(),
-      Jump     = jumpAction.ReadValue<bool>(),
-      Grab     = grabAction.ReadValue<bool>(),
-      Shield   = shieldAction.ReadValue<bool>(),
     };
   }
 

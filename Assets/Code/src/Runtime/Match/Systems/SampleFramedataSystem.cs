@@ -1,42 +1,49 @@
-﻿using Unity.Mathematics;
+﻿using Unity.Physics.Systems;
+using Unity.Mathematics;
 using Unity.Entities;
 using Unity.Transforms;
 
 namespace HouraiTeahouse.FantasyCrescendo.Matches {
 
 [UpdateInGroup(typeof(SimulationSystemGroup))]
+[UpdateBefore(typeof(BuildPhysicsWorld))]
 [UpdateBefore(typeof(TransformSystemGroup))]
 public class SampleFrameDataSystem : SystemBase {
 
   protected override void OnUpdate() {
     var entityManager = World.EntityManager;
 
-    var hitboxes = GetComponentDataFromEntity<Hitbox>(false);
-    var hitboxStates = GetComponentDataFromEntity<HitboxState>(false);
-    var positions = GetComponentDataFromEntity<Translation>(false);
-    var scales = GetComponentDataFromEntity<Scale>(false);
+    var players = GetComponentDataFromEntity<PlayerComponent>(true);
+    var frames = GetComponentDataFromEntity<CharacterFrame>(true);
 
-    Entities.ForEach((Entity entity, ref PlayerComponent player, ref CharacterFrame frame) => {
+    Entities
+    .WithName("SampleNames")
+    .ForEach((ref PlayerComponent player, ref CharacterFrame frame) => {
       player.StateTick++;
       bool validState = GetState(player, out CharacterState state);
       if (!validState) return;
       frame = state.Frames[math.min(player.StateTick, state.Frames.Length - 1)];
-      var playerHitboxes = entityManager.GetBuffer<PlayerHitboxBuffer>(entity);
-      for (var i = 0; i < playerHitboxes.Length; i++) {
-        Entity hitbox = playerHitboxes[i].Hitbox;
-
-        var hitboxState = hitboxStates[hitbox];
-        hitboxState.Enabled = frame.IsHitboxActive(i);
-        hitboxStates[hitbox] = hitboxState;
-
-        if (i >= state.Hitboxes.Length) continue;
-        hitboxes[hitbox] = state.Hitboxes[i].Hitbox;
-        positions[hitbox] = state.Hitboxes[i].Translation;
-        scales[hitbox] = state.Hitboxes[i].Scale;
-      }
     }).Schedule();
 
-    CompleteDependency();
+    Entities
+    .WithName("UpdateHitboxes")
+    .WithReadOnly(players)
+    .WithReadOnly(frames)
+    .ForEach((ref Hitbox hitbox, ref HitboxState state, ref Translation translation, ref Scale scale) => {
+      var player = state.Player;
+      if (!players.HasComponent(player) || !frames.HasComponent(player)) return;
+      state.Enabled = frames[state.Player].IsHitboxActive((int)state.ID);
+      if (!state.Enabled) {
+        state.PreviousPosition = null;
+      }
+
+      bool validState = GetState(players[player], out CharacterState playerState);
+      if (!validState || state.ID >= playerState.Hitboxes.Length) return;
+      var data = playerState.Hitboxes[state.ID];
+      hitbox = data.Hitbox;
+      translation = data.Translation;
+      scale = data.Scale;
+    }).ScheduleParallel();
   }
 
   static bool GetState(in PlayerComponent player, out CharacterState state) {

@@ -1,15 +1,18 @@
 ﻿using HouraiTeahouse.FantasyCrescendo.Matches;
-using System;
 using UnityEngine;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
+using Unity.Physics;
+using Unity.Physics.Authoring;
 using Unity.Transforms;
 
 namespace HouraiTeahouse.FantasyCrescendo.Authoring {
 
+[RequireComponent(typeof(PhysicsBodyAuthoring))]
 public class Player : MonoBehaviour, IConvertGameObjectToEntity {
 
-  [NonSerialized] public uint PlayerID;
+  [System.NonSerialized] public uint PlayerID;
 
 #pragma warning disable 0649
   [SerializeField] CharacterFrameData _frameData;
@@ -27,7 +30,13 @@ public class Player : MonoBehaviour, IConvertGameObjectToEntity {
     });
 
     // Allocate player hitboxes for immediate player use.
-    //CreatePlayerHitboxes(entity, entityManager, CharacterFrame.kMaxPlayerHitboxCount);
+    CreatePlayerHitboxes(entity, entityManager, CharacterFrame.kMaxPlayerHitboxCount);
+
+    // Constrain players to only allow for X/Y movement and zero rotation.
+    conversionSystem.World.GetOrCreateSystem<EndJointConversionSystem>().CreateJointEntity(
+        this, new PhysicsConstrainedBodyPair(conversionSystem.GetPrimaryEntity(this), Entity.Null, false),
+        CreateRigidbodConstraints(Math.DecomposeRigidBodyTransform(transform.localToWorldMatrix))
+    );
   }
 
   void CreatePlayerHitboxes(Entity player, EntityManager entityManager, int size) {
@@ -37,18 +46,18 @@ public class Player : MonoBehaviour, IConvertGameObjectToEntity {
       typeof(Hitbox), typeof(HitboxState));
 
     var group = new NativeArray<LinkedEntityGroup>(size, Allocator.Temp);
-    var hitboxes = new NativeArray<PlayerHitboxBuffer>(size, Allocator.Temp);
     for (var i = 0; i < size; i++) {
       var entity = entityManager.CreateEntity(archetype);
       entityManager.AddComponentData(entity, new Scale { Value = 1.0f });
       entityManager.AddComponentData(entity, new Parent { Value = player });
       entityManager.AddComponentData(entity, new HitboxState {
+        Player = player,
+        ID = i,
         PlayerID = this.PlayerID,
         Enabled = false
       });
 
       group[i] = new LinkedEntityGroup { Value = entity };
-      hitboxes[i] = new PlayerHitboxBuffer { Hitbox = entity };
 
 #if UNITY_EDITOR
       entityManager.SetName(entity, $"{name}, Hitbox {i + 1}");
@@ -56,7 +65,32 @@ public class Player : MonoBehaviour, IConvertGameObjectToEntity {
     }
 
     entityManager.AddBuffer<LinkedEntityGroup>(player).AddRange(group);
-    entityManager.AddBuffer<PlayerHitboxBuffer>(player).AddRange(hitboxes);
+  }
+
+  PhysicsJoint CreateRigidbodConstraints(RigidTransform offset) {
+    var joint = new PhysicsJoint {
+      BodyAFromJoint = BodyFrame.Identity,
+      BodyBFromJoint = offset
+    };
+    var constraints = new FixedList128<Constraint>();
+    constraints.Add(new Constraint {
+      ConstrainedAxes = new bool3(false, false, true),
+      Type = ConstraintType.Linear,
+      Min = 0,
+      Max = 0,
+      SpringFrequency = Constraint.DefaultSpringFrequency,
+      SpringDamping = Constraint.DefaultSpringDamping
+    });
+    constraints.Add(new Constraint {
+      ConstrainedAxes = new bool3(true, true, true),
+      Type = ConstraintType.Angular,
+      Min = 0,
+      Max = 0,
+      SpringFrequency = Constraint.DefaultSpringFrequency,
+      SpringDamping = Constraint.DefaultSpringDamping
+    });
+    joint.SetConstraints(constraints);
+    return joint;
   }
 
 }

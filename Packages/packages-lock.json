@@ -92,6 +92,21 @@
       },
       "url": "https://packages.unity.com"
     },
+    "com.unity.dots.editor": {
+      "version": "0.8.2-preview",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.entities": "0.11.1-preview.4",
+        "com.unity.properties": "1.2.0-preview",
+        "com.unity.serialization": "1.2.0-preview",
+        "com.unity.properties.ui": "1.2.0-preview",
+        "com.unity.jobs": "0.2.10-preview.12",
+        "com.unity.burst": "1.3.0-preview.12",
+        "com.unity.test-framework.performance": "2.0.8-preview"
+      },
+      "url": "https://packages.unity.com"
+    },
     "com.unity.entities": {
       "version": "0.13.0-preview.24",
       "depth": 1,

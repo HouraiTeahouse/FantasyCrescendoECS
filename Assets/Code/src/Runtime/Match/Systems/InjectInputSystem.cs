@@ -6,23 +6,26 @@ namespace HouraiTeahouse.FantasyCrescendo.Matches {
 
 public class InjectInputsSystem : SystemBase {
 
-  PlayerInput[] _inputs;
+  NativeArray<PlayerInput> _inputs;
 
   protected override void OnCreate() {
-    _inputs = MatchConfig.CreatePlayerBuffer<PlayerInput>();
+    _inputs = MatchConfig.CreateNativePlayerBuffer<PlayerInput>();
   }
 
   protected override void OnUpdate() {
-    var sampledInputs = new NativeArray<PlayerInput>(_inputs.Length, Allocator.TempJob);
-    sampledInputs.CopyFrom(_inputs);
+    NativeArray<PlayerInput> inputs = _inputs;
     Entities.ForEach((ref PlayerInputComponent input, in PlayerConfig config) => {
-      input.Update(sampledInputs[config.PlayerID]);
+      input.Update(inputs[config.PlayerID]);
     }).Schedule();
-    Dependency = sampledInputs.Dispose(Dependency);
+  }
+
+  protected override void OnDestroy() {
+    _inputs.Dispose();
   }
 
   public void SetPlayerInput(int playerId, in PlayerInput input) {
     Assert.IsTrue(playerId >= 0 && playerId < MatchConfig.kMaxSupportedPlayers);
+    CompleteDependency();
     _inputs[playerId] = input;
   }
 

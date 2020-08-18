@@ -1,6 +1,7 @@
 ﻿using HouraiTeahouse.FantasyCrescendo.Utils;
 using HouraiTeahouse.FantasyCrescendo.Authoring;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,7 +9,9 @@ using Unity.Core;
 using Unity.Collections;
 using Unity.Transforms;
 using Unity.Assertions;
+using Unity.Mathematics;
 using Unity.Entities;
+using Unity.Entities.Serialization;
 
 namespace HouraiTeahouse.FantasyCrescendo.Matches {
 
@@ -58,6 +61,7 @@ public abstract class Match : IDisposable {
   }
 
   public virtual void Update() => Step();
+  
   public virtual void Dispose() {
     _blobAssetStore?.Dispose();
     _blobAssetStore = null;
@@ -76,7 +80,7 @@ public abstract class Match : IDisposable {
     InjectInputs(inputs);
   }
 
-  protected void InjectInputs(NativeArray<PlayerInput> inputs) {
+  protected virtual void InjectInputs(NativeArray<PlayerInput> inputs) {
     var system = World?.GetOrCreateSystem<InjectInputsSystem>();
     for (var i = 0; i < inputs.Length; i++) {
       system.SetPlayerInput(i, inputs[i]);
@@ -93,13 +97,10 @@ public abstract class Match : IDisposable {
   }
 
   void SetupStage(MatchInitializationSettings settings) {
-    var archetype = EntityManager.CreateArchetype(
-      ComponentType.ReadWrite<Translation>(),
-      ComponentType.ReadWrite<RespawnPoint>()
-    );
+    var system  = World.GetExistingSystem<PlayerRespawnSystem>();
+    system.Reset();
     foreach (var point in settings.RespawnPoints) {
-      var entity = EntityManager.CreateEntity(archetype);
-      EntityManager.AddComponentData(entity, new Translation { Value = point.position });
+      system.AddRespawnPoint(point.position);
     }
   }
 
@@ -144,6 +145,145 @@ public abstract class Match : IDisposable {
     UnityEngine.Object.Destroy(player);
     Debug.Log($"Player {playerConfig.PlayerID} spawned!");
     return entity;
+  }
+
+}
+
+public class TrainingMatch : Match {
+
+  public TrainingMatch(MatchConfig config, World world = null) : base(config, world) {
+    Assert.AreEqual(config.PlayerCount, 1);
+  }
+
+  protected override IEnumerable<Type> GetRuleTypes() {
+    Assert.IsNotNull(Config);
+    yield return typeof(TrainingMatchRuleSystem);
+  }
+
+}
+
+/// <summary>
+/// An abstract class for default playable matches.
+/// </summary>
+public abstract class DefaultMatch : Match {
+
+  public DefaultMatch(MatchConfig config, World world = null) : base(config, world) {
+  }
+
+  protected override IEnumerable<Type> GetRuleTypes() {
+    Assert.IsNotNull(Config);
+    if (Config.Time > 0) {
+      yield return typeof(TimeMatchRuleSystem);
+    }
+    if (Config.Stocks > 0) {
+      yield return typeof(StockMatchRuleSystem);
+    }
+  }
+
+}
+
+/// <summary>
+/// An abstract class for all matches that support recording replays.
+/// </summary>
+public abstract class RecordableMatch : DefaultMatch {
+
+  public static readonly string ReplayFileExtension = ".replay";
+  public string ReplayFilePath { get; }
+  readonly ReplayWriter _writer;
+
+  protected RecordableMatch(MatchConfig config, World world = null) : base(config, world) {
+    ReplayFilePath = GetReplayFilename();
+    var binaryWriter = new StreamBinaryWriter(ReplayFilePath);
+    _writer = new ReplayWriter(binaryWriter);
+    // FIXME: This should write the MatchConfig here.
+  }
+
+  protected override void InjectInputs(NativeArray<PlayerInput> inputs) {
+    base.InjectInputs(inputs);
+    _writer?.WriteInputs(inputs);
+  }
+
+  protected virtual string GetReplayFilename() {
+    return Path.Combine(Application.persistentDataPath, 
+                        Guid.NewGuid().ToString() + ReplayFileExtension);
+  }
+
+  public override void Dispose() {
+    base.Dispose();
+    _writer?.Dispose();
+  }
+
+}
+
+/// <summary>
+/// Replays a previously saved RecordableMatch.
+/// </summary>
+public sealed class ReplayMatch : DefaultMatch {
+
+  readonly ReplayReader _reader;
+
+  public ReplayMatch(MatchConfig config, ReplayReader reader, World world = null) 
+                      : base(config, world) {
+    Assert.IsNotNull(reader);
+    _reader = reader;
+  }
+
+  protected override void SampleInputs() {
+    var inputs = MatchConfig.CreateNativePlayerBuffer<PlayerInput>(Allocator.Temp);
+    _reader.ReadInputs(inputs);
+    InjectInputs(inputs);
+  }
+
+  public override void Dispose() {
+    base.Dispose();
+    _reader.Dispose();
+  }
+
+}
+
+/// <summary>
+/// The typical local game match. This should be used for the most local
+/// matches.
+/// </summary>
+public sealed class LocalDefaultMatch : RecordableMatch {
+
+  public LocalDefaultMatch(MatchConfig config, World world = null) : base(config, world) {
+  }
+
+}
+
+/// <summary>
+/// A debug focused Match type. Every game tick is run twice from a save 
+/// state at the beginning of the tick, and the state hashes before and after
+/// the tick are compared to make sure they are the same.
+/// </summary>
+public sealed class LocalRollbackTestMatch : DefaultMatch {
+
+  public LocalRollbackTestMatch(MatchConfig config, World world = null) : base(config, world) {
+  }
+
+  public override void Update() {
+    var hasher = World.GetOrCreateSystem<HashWorldSystem>();
+    var id = WorldPool.Instance.Get(out World saveState);
+    saveState.EntityManager.CopyAndReplaceEntitiesFrom(EntityManager);
+    hasher.Update();
+    ulong[] beforeHash = hasher.GetComponentHashes();
+    Step();
+    ulong[] hash = hasher.GetComponentHashes();
+    EntityManager.CopyAndReplaceEntitiesFrom(saveState.EntityManager);
+    hasher.Update();
+    ulong[] beforeHash2 = hasher.GetComponentHashes();
+    Step();
+    ulong[] hash2 = hasher.GetComponentHashes();
+    for (var i = 0; i < hash2.Length; i++) {
+      if (beforeHash[i] == beforeHash2[i]) continue;
+      Debug.Log($"BEFORE Component Difference at {i}: {beforeHash[i]} {beforeHash2[i]}");
+    }
+    for (var i = 0; i < hash2.Length; i++) {
+      if (hash[i] == hash2[i]) continue;
+      Debug.Log($"AFTER Component Difference at {i}: {hash[i]} {hash2[i]}");
+    }
+    WorldPool.Instance.Remove(id);
   }
 
 }
