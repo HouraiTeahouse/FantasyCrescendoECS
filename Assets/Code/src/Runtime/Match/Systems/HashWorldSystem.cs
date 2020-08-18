@@ -123,7 +123,7 @@ public class HashWorldSystem : SystemBase {
         }
         var results = slice.Value;
         results.Sort();
-        var hashes = new NativeArray<Hash>(results.Length, Allocator.Temp);
+        var hashes = new NativeArray<Hash>(results.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
         for (var j = 0; j < hashes.Length; j++) {
           hashes[j] = results[j].Hash;
         }

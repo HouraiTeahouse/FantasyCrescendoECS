@@ -14,7 +14,7 @@ public static class NativeMultiHashMapExtensions {
 
     var count = map.CountValuesForKey(key);
     var iterator = map.GetValuesForKey(key);
-    var values = new NativeArray<TValue>(count, Allocator.Temp);
+    var values = new NativeArray<TValue>(count, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
     for (var i = 0; i < count && iterator.MoveNext(); i++) {
       values[i] = iterator.Current;
     }
