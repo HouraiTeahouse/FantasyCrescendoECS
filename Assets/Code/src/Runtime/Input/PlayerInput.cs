@@ -6,41 +6,21 @@ namespace HouraiTeahouse.FantasyCrescendo.Matches {
 public struct PlayerInput {
 
   [Flags]
-  public enum ButtonBits {
+  public enum Button : byte {
     ATTACK, SPECIAL, JUMP, SHIELD, GRAB
   }
 
-  public byte Buttons;
+  public Button Buttons;
   public Vector2b Movement;
   public Vector2b Smash;
 
-  public bool Attack {
-    get => BitUtil.GetBit(Buttons, (int)ButtonBits.ATTACK);
-    set => BitUtil.SetBit(ref Buttons, (int)ButtonBits.ATTACK, value);
-  }
-
-  public bool Special {
-    get => BitUtil.GetBit(Buttons, (int)ButtonBits.SPECIAL);
-    set => BitUtil.SetBit(ref Buttons, (int)ButtonBits.SPECIAL, value);
-  }
-
-  public bool Jump {
-    get => BitUtil.GetBit(Buttons, (int)ButtonBits.JUMP);
-    set => BitUtil.SetBit(ref Buttons, (int)ButtonBits.JUMP, value);
-  }
-
-  public bool Shield {
-    get => BitUtil.GetBit(Buttons, (int)ButtonBits.SHIELD);
-    set => BitUtil.SetBit(ref Buttons, (int)ButtonBits.SHIELD, value);
-  }
-
-  public bool Grab {
-    get => BitUtil.GetBit(Buttons, (int)ButtonBits.GRAB);
-    set => BitUtil.SetBit(ref Buttons, (int)ButtonBits.GRAB, value);
+  public bool IsPressed(Button button) => (Buttons & button) != 0;
+  public void Set(Button button, bool value) {
+    Buttons = value ? (Buttons | button) : (Buttons & ~button);
   }
 
   public static bool operator ==(PlayerInput a, PlayerInput b) {
-    var equals = (a.Buttons & 31) == (b.Buttons & 31);
+    var equals = ((int)a.Buttons & 31) == ((int)b.Buttons & 31);
     equals &= a.Movement == b.Movement;
     equals &= a.Smash == b.Smash;
     return equals;
@@ -53,14 +33,14 @@ public struct PlayerInput {
   }
 
   public override string ToString() {
-    var buttons = Convert.ToString(Buttons, 2).PadLeft(8, '0');
+    var buttons = Convert.ToString((byte)Buttons, 2).PadLeft(8, '0');
     return $"PlayerInput(({Movement.x}, {Movement.y}), ({Smash.x}, {Smash.y}), {buttons})";
   }
 
   public override int GetHashCode() => 
     31 * Movement.GetHashCode() + 
     17 * Smash.GetHashCode() + 
-    (Buttons & 31).GetHashCode();
+    ((byte)Buttons & 31).GetHashCode();
 
 }
 
