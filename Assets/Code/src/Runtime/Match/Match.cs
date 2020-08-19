@@ -194,13 +194,13 @@ public abstract class RecordableMatch : DefaultMatch {
   protected RecordableMatch(MatchConfig config, World world = null) : base(config, world) {
     ReplayFilePath = GetReplayFilename();
     var binaryWriter = new StreamBinaryWriter(ReplayFilePath);
-    _writer = new ReplayWriter(binaryWriter);
+    _writer = new ReplayWriter(config, binaryWriter);
     // FIXME: This should write the MatchConfig here.
   }
 
   protected override void InjectInputs(NativeArray<PlayerInput> inputs) {
     base.InjectInputs(inputs);
-    _writer?.WriteInputs(inputs);
+    _writer?.WriteInputs(new NativeSlice<PlayerInput>(inputs, 0, Config.PlayerCount));
   }
 
   protected virtual string GetReplayFilename() {
@@ -230,7 +230,7 @@ public sealed class ReplayMatch : DefaultMatch {
 
   protected override void SampleInputs() {
     var inputs = MatchConfig.CreateNativePlayerBuffer<PlayerInput>(Allocator.Temp);
-    _reader.ReadInputs(inputs);
+    _reader.ReadInputs(new NativeSlice<PlayerInput>(inputs, 0, Config.PlayerCount));
     InjectInputs(inputs);
   }
 
