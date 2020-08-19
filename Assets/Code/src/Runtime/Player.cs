@@ -12,7 +12,7 @@ namespace HouraiTeahouse.FantasyCrescendo.Authoring {
 [RequireComponent(typeof(PhysicsBodyAuthoring))]
 public class Player : MonoBehaviour, IConvertGameObjectToEntity {
 
-  [System.NonSerialized] public uint PlayerID;
+  [System.NonSerialized] public byte PlayerID;
 
 #pragma warning disable 0649
   [SerializeField] CharacterFrameData _frameData;
@@ -35,7 +35,7 @@ public class Player : MonoBehaviour, IConvertGameObjectToEntity {
     // Constrain players to only allow for X/Y movement and zero rotation.
     conversionSystem.World.GetOrCreateSystem<EndJointConversionSystem>().CreateJointEntity(
         this, new PhysicsConstrainedBodyPair(conversionSystem.GetPrimaryEntity(this), Entity.Null, false),
-        CreateRigidbodConstraints(Math.DecomposeRigidBodyTransform(transform.localToWorldMatrix))
+        CreateRigidbodyConstraints(Math.DecomposeRigidBodyTransform(transform.localToWorldMatrix))
     );
   }
 
@@ -46,7 +46,7 @@ public class Player : MonoBehaviour, IConvertGameObjectToEntity {
       typeof(Hitbox), typeof(HitboxState));
 
     var group = new NativeArray<LinkedEntityGroup>(size, Allocator.Temp);
-    for (var i = 0; i < size; i++) {
+    for (byte i = 0; i < size; i++) {
       var entity = entityManager.CreateEntity(archetype);
       entityManager.AddComponentData(entity, new Scale { Value = 1.0f });
       entityManager.AddComponentData(entity, new Parent { Value = player });
@@ -67,7 +67,7 @@ public class Player : MonoBehaviour, IConvertGameObjectToEntity {
     entityManager.AddBuffer<LinkedEntityGroup>(player).AddRange(group);
   }
 
-  PhysicsJoint CreateRigidbodConstraints(RigidTransform offset) {
+  PhysicsJoint CreateRigidbodyConstraints(RigidTransform offset) {
     var joint = new PhysicsJoint {
       BodyAFromJoint = BodyFrame.Identity,
       BodyBFromJoint = offset

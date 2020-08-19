@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83f38228bcad67e428dff79681a1f94e, type: 3}
+  m_Name: Debug Config
+  m_EditorClassIdentifier: 
+  HitboxMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+  HitboxMaterial: {fileID: 2100000, guid: c9c1bbb59f25c834dae2c36999e10e7d, type: 2}
+  HitboxColors:
+    Offensive:
+      serializedVersion: 2
+      rgba: 4278190335
+    Damageable:
+      serializedVersion: 2
+      rgba: 4278255615
+    Invincible:
+      serializedVersion: 2
+      rgba: 4278255360
+    Intangible:
+      serializedVersion: 2
+      rgba: 4294901760
+    Grazing:
+      serializedVersion: 2
+      rgba: 4278223103
+    Shield:
+      serializedVersion: 2
+      rgba: 4294967040
+    Grab:
+      serializedVersion: 2
+      rgba: 4294902015

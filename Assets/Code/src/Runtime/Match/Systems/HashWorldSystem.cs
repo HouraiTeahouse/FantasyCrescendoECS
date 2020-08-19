@@ -21,7 +21,7 @@ namespace HouraiTeahouse.FantasyCrescendo.Matches {
 [UpdateAfter(typeof(EndSimulationEntityCommandBufferSystem))]
 public class HashWorldSystem : SystemBase {
 
-  public struct HashResult : IComparable<HashResult> {
+  struct HashResult : IComparable<HashResult> {
     public static readonly int Size = UnsafeUtility.SizeOf<HashResult>();
 
     public int ID;
