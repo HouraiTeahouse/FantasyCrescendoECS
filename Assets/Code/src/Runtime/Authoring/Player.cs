@@ -23,11 +23,16 @@ public class Player : MonoBehaviour, IConvertGameObjectToEntity {
     entityManager.AddComponent(entity, typeof(PlayerConfig));
     entityManager.AddComponent(entity, typeof(PlayerInputComponent));
     entityManager.AddComponent(entity, typeof(CharacterFrame));
+    // Copy the player's position and transforms from the Entity to the GameObject
     entityManager.AddComponentData(entity, new PlayerComponent {
       StateController = _frameData != null ? 
         _frameData.BuildController() : 
         default(BlobAssetReference<CharacterStateController>)
     });
+
+    // Copy the player's position and transforms from the Entity to the GameObject
+    entityManager.AddComponent<CopyTransformToGameObject>(entity);
+    entityManager.AddComponentObject(entity, transform);
 
     // Allocate player hitboxes for immediate player use.
     CreatePlayerHitboxes(entity, entityManager, CharacterFrame.kMaxPlayerHitboxCount);
@@ -37,6 +42,18 @@ public class Player : MonoBehaviour, IConvertGameObjectToEntity {
         this, new PhysicsConstrainedBodyPair(conversionSystem.GetPrimaryEntity(this), Entity.Null, false),
         CreateRigidbodyConstraints(Math.DecomposeRigidBodyTransform(transform.localToWorldMatrix))
     );
+
+    // Copy bone positions and transforms from the GameObject to the Entities
+    // foreach (var child in conversionSystem.GetEntities(gameObject)) {
+    //   if (child == entity) continue;
+    //   entityManager.AddComponent<CopyTransformFromGameObject>(child);
+    // }
+    foreach (var child in GetComponentsInChildren<Transform>()) {
+      if (child == transform) continue;
+      Entity childEntity = conversionSystem.GetPrimaryEntity(child.gameObject);
+      entityManager.AddComponent<CopyTransformFromGameObject>(childEntity);
+      entityManager.AddComponentObject(childEntity, child);
+    }
   }
 
   void CreatePlayerHitboxes(Entity player, EntityManager entityManager, int size) {
@@ -49,6 +66,9 @@ public class Player : MonoBehaviour, IConvertGameObjectToEntity {
     for (byte i = 0; i < size; i++) {
       var entity = entityManager.CreateEntity(archetype);
       entityManager.AddComponentData(entity, new Scale { Value = 1.0f });
+      entityManager.AddComponentData(entity, new Hitbox {
+        Radius = 1,
+      });
       entityManager.AddComponentData(entity, new Parent { Value = player });
       entityManager.AddComponentData(entity, new HitboxState {
         Player = player,

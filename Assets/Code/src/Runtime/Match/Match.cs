@@ -142,8 +142,12 @@ public abstract class Match : IDisposable {
       Stocks = (int)Config.Stocks,
       Damage = playerConfig.DefaultDamage,
     });
-    UnityEngine.Object.Destroy(player);
     Debug.Log($"Player {playerConfig.PlayerID} spawned!");
+
+    foreach (var component in player.GetComponentsInChildren<IConvertGameObjectToEntity>()) {
+      UnityEngine.Object.Destroy((Component)component);
+    }
+
     return entity;
   }
 

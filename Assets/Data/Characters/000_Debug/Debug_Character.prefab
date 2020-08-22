@@ -1,5 +1,35 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &3740163442733809883
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2590992321058927337}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 853708c8afb59ca449321995a4d5059b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Hitbox:
+    Flags: 0
+    Radius: 1.5
+    Priority: 0
+    Damage:
+      Base: 0
+      Scaling: 0
+    KnockbackAngle: 0
+    KnockbackForce:
+      Base: 0
+      Scaling: 0
+    Hitstun:
+      Base: 0
+      Scaling: 0
+  State:
+    ID: 0
+    PlayerID: 0
+    Enabled: 1
 --- !u!1 &7851227183246524813
 GameObject:
   m_ObjectHideFlags: 0
@@ -322,11 +352,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: Sinsack_Mesh
       objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: 16d22f3ed8041f243b50f10b50021162,
+        type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 81af2ee9da2ada2458fdccac3e39df61, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 16d22f3ed8041f243b50f10b50021162, type: 3}
 --- !u!4 &2092248184374017626 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 16d22f3ed8041f243b50f10b50021162,
+    type: 3}
+  m_PrefabInstance: {fileID: 1910531049825032625}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &2590992321058927337 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4140668533725440856, guid: 16d22f3ed8041f243b50f10b50021162,
     type: 3}
   m_PrefabInstance: {fileID: 1910531049825032625}
   m_PrefabAsset: {fileID: 0}

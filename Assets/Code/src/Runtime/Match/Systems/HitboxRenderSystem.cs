@@ -42,7 +42,7 @@ public class HitboxRenderSystem : SystemBase {
     var hitboxJob = Entities
     .WithBurst(FloatMode.Fast)
     .ForEach((in Hitbox hitbox, in HitboxState state, in LocalToWorld transform) => {
-      if (state.Enabled) return;
+      if (!state.Enabled) return;
       float3 currentPosition = math.transform(transform.Value, float3.zero);
       float3 prevPosition = state.PreviousPosition ?? currentPosition;
       float3 center = (currentPosition + prevPosition) / 2;

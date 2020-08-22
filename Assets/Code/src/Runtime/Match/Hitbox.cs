@@ -31,6 +31,7 @@ public enum HitboxFlags : byte {
   TRASCENDENT_PRIORITY = 1 << 1,
 }
 
+[Serializable]
 public struct HitboxState : IComponentData {
   public Entity Player;
   public byte ID;
@@ -39,7 +40,7 @@ public struct HitboxState : IComponentData {
   public float3? PreviousPosition;
 }
 
-[GenerateAuthoringComponent]
+[Serializable]
 public struct Hitbox : IComponentData {
   public HitboxFlags Flags;
   public float Radius;
@@ -54,7 +55,7 @@ public struct Hitbox : IComponentData {
   public void Unset(HitboxFlags flags) => Flags = Flags & ~flags;
 }
 
-[GenerateAuthoringComponent]
+[Serializable]
 public struct Hurtbox : IComponentData {
   public bool Enabled => Type != HurtboxType.INACTIVE;
 
