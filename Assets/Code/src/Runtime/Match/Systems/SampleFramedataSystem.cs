@@ -11,11 +11,6 @@ namespace HouraiTeahouse.FantasyCrescendo.Matches {
 public class SampleFrameDataSystem : SystemBase {
 
   protected override void OnUpdate() {
-    var entityManager = World.EntityManager;
-
-    var players = GetComponentDataFromEntity<PlayerComponent>(true);
-    var frames = GetComponentDataFromEntity<CharacterFrame>(true);
-
     Entities
     .WithName("SampleNames")
     .ForEach((ref PlayerComponent player, ref CharacterFrame frame) => {
@@ -27,22 +22,20 @@ public class SampleFrameDataSystem : SystemBase {
 
     Entities
     .WithName("UpdateHitboxes")
-    .WithReadOnly(players)
-    .WithReadOnly(frames)
-    .ForEach((ref Hitbox hitbox, ref HitboxState state, ref Translation translation, ref Scale scale) => {
+    .ForEach((ref Hitbox hitbox, ref HitboxState state, ref Translation translation) => {
       var player = state.Player;
-      if (!players.HasComponent(player) || !frames.HasComponent(player)) return;
-      state.Enabled = frames[state.Player].IsHitboxActive((int)state.ID);
+      if (!HasComponent<PlayerComponent>(player) || !HasComponent<CharacterFrame>(player)) return;
+      state.Enabled = GetComponent<CharacterFrame>(player).IsHitboxActive((int)state.ID);
       if (!state.Enabled) {
         state.PreviousPosition = null;
       }
 
-      bool validState = GetState(players[player], out CharacterState playerState);
+      var playerComponent = GetComponent<PlayerComponent>(player);
+      bool validState = GetState(playerComponent, out CharacterState playerState);
       if (!validState || state.ID >= playerState.Hitboxes.Length) return;
-      var data = playerState.Hitboxes[state.ID];
+      ref CharacterStateHitbox data = ref playerState.Hitboxes[state.ID];
       hitbox = data.Hitbox;
-      translation = data.Translation;
-      scale = data.Scale;
+      translation = data.Positions[math.min(playerComponent.StateTick, data.Positions.Length - 1)];
     }).ScheduleParallel();
   }
 

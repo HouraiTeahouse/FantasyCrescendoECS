@@ -29,10 +29,8 @@ public enum TransitionCondition : uint {
 }
 
 public struct CharacterStateHitbox {
-  public bool Enabled;
-  public Translation Translation;
-  public Scale Scale;
   public Hitbox Hitbox;
+  public BlobArray<Translation> Positions;
 }
 
 public struct CharacterStateTransition {
@@ -70,6 +68,20 @@ public class StateFrameData : ScriptableObject {
     }
   }
 
+  public class HitboxData {
+    public bool Enabled;
+    public string BoundBone;
+    public Translation Offset;
+    public Hitbox Hitbox;
+    public Translation[] BakedPositions;
+
+    public CharacterStateHitbox ToStateHitbox(ref BlobBuilder builder) {
+      var stateHitbox = new CharacterStateHitbox { Hitbox = this.Hitbox };
+      builder.Construct(ref stateHitbox.Positions, BakedPositions.ToArray());
+      return stateHitbox;
+    }
+  }
+
   public class Track {
     // A list of booleans
     public string Name;
@@ -77,7 +89,7 @@ public class StateFrameData : ScriptableObject {
     public bool Enabled;
     public FrameFlags Flags;
     public List<int> TogglePoints;
-    public List<CharacterStateHitbox> Hitboxes;
+    public List<HitboxData> Hitboxes;
 
     public void Apply(CharacterFrame[] frames, int hitboxOffset = 0) {
       if (!Enabled) return;
@@ -123,8 +135,10 @@ public class StateFrameData : ScriptableObject {
 #pragma warning disable 0649
   [SerializeField] string _name;
   [SerializeField] int _length;
-  [SerializeField] List<Track> _tracks;
   [SerializeField] List<Transition> _transitions;
+
+  public AnimationClip Animation;
+  public List<Track> Tracks;
 
   [SerializeField] AnimationCurve HorizontalMovement;
   [SerializeField] AnimationCurve VerticalMovement;
@@ -137,7 +151,7 @@ public class StateFrameData : ScriptableObject {
     var state = new CharacterState();
     builder.AllocateString(ref state.Name, _name);
     builder.Construct(ref state.Frames, BuildFrames());
-    builder.Construct(ref state.Hitboxes, BuildHitboxes());
+    builder.Construct(ref state.Hitboxes, BuildHitboxes(ref builder));
 
     var transitions = new List<CharacterStateTransition>();
     foreach (var transition in _transitions) {
@@ -151,7 +165,7 @@ public class StateFrameData : ScriptableObject {
   CharacterFrame[] BuildFrames() {
     var frames = new CharacterFrame[_length];
     var hitboxOffset = 0;
-    foreach (var track in _tracks) {
+    foreach (var track in Tracks) {
       if (!track.Enabled) continue;
       track?.Apply(frames, hitboxOffset);
       hitboxOffset += (track?.Enabled ?? false) ? track.Hitboxes.Count : 0;
@@ -167,13 +181,13 @@ public class StateFrameData : ScriptableObject {
     return frames;
   }
 
-  CharacterStateHitbox[] BuildHitboxes() {
+  CharacterStateHitbox[] BuildHitboxes(ref BlobBuilder builder) {
     var hitboxes = new List<CharacterStateHitbox>();
-    foreach (var track in _tracks) {
+    foreach (var track in Tracks) {
       if (!track.Enabled) continue;
       foreach (var hitbox in track.Hitboxes) {
         if (!hitbox.Enabled) continue;
-        hitboxes.Add(hitbox);
+        hitboxes.Add(hitbox.ToStateHitbox(ref builder));
         if (hitboxes.Count >= CharacterFrame.kMaxPlayerHitboxCount) {
           return hitboxes.ToArray();
         }

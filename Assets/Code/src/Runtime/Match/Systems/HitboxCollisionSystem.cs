@@ -48,12 +48,10 @@ public class HitboxCollisionSystem : SystemBase {
     NativeMultiHashMap<Entity, HitboxCollision> collisions = _collisions;
     collisions.Clear();
     var collisionWriter = collisions.AsParallelWriter();
-    var hurtboxes = GetComponentDataFromEntity<Hurtbox>(true);
 
     Entities
     .WithName("QueryHitboxCollisons")
     .WithReadOnly(physicsWorld)
-    .WithReadOnly(hurtboxes)
     .ForEach((Entity entity, ref Hitbox hitbox, ref HitboxState state, in LocalToWorld transform) => {
       if (!state.Enabled) return;
 
@@ -75,8 +73,8 @@ public class HitboxCollisionSystem : SystemBase {
 
       for (var i = 0; i < hits.Length; i++) {
         var hit = hits[i];
-        if (!hurtboxes.HasComponent(hit.Entity)) continue;
-        Hurtbox hurtbox = hurtboxes[hit.Entity];
+        if (!HasComponent<Hurtbox>(hit.Entity)) continue;
+        var hurtbox = GetComponent<Hurtbox>(hit.Entity);
         if (!hurtbox.Enabled || hurtbox.Player == Entity.Null || hurtbox.Player == state.Player) continue;
 
         collisionWriter.Add(hit.Entity, new HitboxCollision {

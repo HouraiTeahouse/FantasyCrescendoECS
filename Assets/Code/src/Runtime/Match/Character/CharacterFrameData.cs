@@ -15,7 +15,7 @@ public class CharacterFrameData : ScriptableObject {
 
 #pragma warning disable 0649
   [SerializeField] StateFrameData _default;
-  [SerializeField] List<StateFrameData> _actions;
+  public List<StateFrameData> States;
 #pragma warning restore 0649
 
   BlobAssetReference<CharacterStateController> _reference;
@@ -24,8 +24,8 @@ public class CharacterFrameData : ScriptableObject {
     if (_reference != BlobAssetReference<CharacterStateController>.Null) return _reference;
     var builder = new BlobBuilder(Allocator.Temp);
     ref CharacterStateController controller = ref builder.ConstructRoot<CharacterStateController>();
-    var idMap = BuildIdMap(_actions);
-    var actions =_actions?.Select(a => a.BuildState(ref builder, idMap));
+    var idMap = BuildIdMap(States);
+    var actions =States?.Select(a => a.BuildState(ref builder, idMap));
     builder.Construct(ref controller.States, actions);
     _reference = builder.CreateBlobAssetReference<CharacterStateController>(Allocator.Persistent);
     builder.Dispose();
