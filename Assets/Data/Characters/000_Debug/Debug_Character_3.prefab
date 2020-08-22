@@ -70,7 +70,17 @@ PrefabInstance:
     - target: {fileID: 179798011381033370, guid: 97dc40ad494bbfc4e87d07a4ed5ac570,
         type: 3}
       propertyPath: m_Name
-      value: Debug_Character
+      value: Debug_Character_3
       objectReference: {fileID: 0}
+    - target: {fileID: 3319883879732871334, guid: 97dc40ad494bbfc4e87d07a4ed5ac570,
+        type: 3}
+      propertyPath: m_PrimitiveOrientation.Value.z
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 7445721006324721066, guid: 97dc40ad494bbfc4e87d07a4ed5ac570,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 10b01672dfafc9f439ea956768e7f86b, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 97dc40ad494bbfc4e87d07a4ed5ac570, type: 3}
