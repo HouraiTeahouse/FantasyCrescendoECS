@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 ﻿using UnityEngine;
 using Unity.Entities;
 
@@ -13,3 +14,12 @@ public struct GroundedTrigger : IComponentData
         Debug.Log("exit");
     }
 }
+=======
+﻿using Unity.Entities;
+namespace HouraiTeahouse.FantasyCrescendo{
+    [GenerateAuthoringComponent]
+    public struct GroundedTrigger : IComponentData{
+        public bool triggered;
+    }
+}
+>>>>>>> Stashed changes
