@@ -23,6 +23,7 @@ public class Player : MonoBehaviour, IConvertGameObjectToEntity {
     entityManager.AddComponent(entity, typeof(PlayerConfig));
     entityManager.AddComponent(entity, typeof(PlayerInputComponent));
     entityManager.AddComponent(entity, typeof(CharacterFrame));
+    entityManager.AddComponent(entity, typeof(CameraTarget));
     // Copy the player's position and transforms from the Entity to the GameObject
     entityManager.AddComponentData(entity, new PlayerComponent {
       StateController = _frameData != null ? 
