@@ -6,6 +6,8 @@ using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Authoring;
 using Unity.Transforms;
+using UnityEngine.Playables;
+using UnityEngine.Animations;
 
 namespace HouraiTeahouse.FantasyCrescendo.Authoring {
 
@@ -17,17 +19,35 @@ public class Player : MonoBehaviour, IConvertGameObjectToEntity {
 #pragma warning disable 0649
   [SerializeField] CharacterFrameData _frameData;
 #pragma warning restore 0649
+
+  PlayableGraph _graph;
+
+  void OnDestroy() {
+    if (_graph.IsValid()) {
+      _graph.Destroy();
+    }
+  }
   
   public void Convert(Entity entity, EntityManager entityManager, 
                       GameObjectConversionSystem conversionSystem) {
+    _graph = PlayableGraph.Create();
+    _graph.SetTimeUpdateMode(DirectorUpdateMode.Manual);
+
+    var animator = GetComponentInChildren<Animator>();
+    AnimationPlayableOutput.Create(_graph, name + " Animation", animator);
+
     entityManager.AddComponent(entity, typeof(PlayerConfig));
+    entityManager.AddComponent(entity, typeof(PlayerComponent));
     entityManager.AddComponent(entity, typeof(PlayerInputComponent));
     entityManager.AddComponent(entity, typeof(CharacterFrame));
     entityManager.AddComponent(entity, typeof(CameraTarget));
     // Copy the player's position and transforms from the Entity to the GameObject
-    entityManager.AddComponentData(entity, new PlayerComponent {
+    entityManager.AddComponentData(entity, new PlayerCharacter {
+      PlayableGraph = _graph,
       StateController = _frameData != null ? 
-        _frameData.BuildController() : 
+        _frameData.BuildController(new CharacterControllerBuildParams {
+          Graph = _graph
+        }) : 
         default(BlobAssetReference<CharacterStateController>)
     });
 
@@ -45,10 +65,6 @@ public class Player : MonoBehaviour, IConvertGameObjectToEntity {
     );
 
     // Copy bone positions and transforms from the GameObject to the Entities
-    // foreach (var child in conversionSystem.GetEntities(gameObject)) {
-    //   if (child == entity) continue;
-    //   entityManager.AddComponent<CopyTransformFromGameObject>(child);
-    // }
     foreach (var child in GetComponentsInChildren<Transform>()) {
       if (child == transform) continue;
       Entity childEntity = conversionSystem.GetPrimaryEntity(child.gameObject);

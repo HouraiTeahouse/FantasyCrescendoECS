@@ -20,12 +20,12 @@ public class CharacterFrameData : ScriptableObject {
 
   BlobAssetReference<CharacterStateController> _reference;
 
-  public BlobAssetReference<CharacterStateController> BuildController() {
+  public BlobAssetReference<CharacterStateController> BuildController(CharacterControllerBuildParams builderParams) {
     if (_reference != BlobAssetReference<CharacterStateController>.Null) return _reference;
     var builder = new BlobBuilder(Allocator.Temp);
     ref CharacterStateController controller = ref builder.ConstructRoot<CharacterStateController>();
-    var idMap = BuildIdMap(States);
-    var actions =States?.Select(a => a.BuildState(ref builder, idMap));
+    builderParams.StateMap = BuildIdMap(States);
+    var actions = States?.Select(a => a.BuildState(ref builder, builderParams));
     builder.Construct(ref controller.States, actions);
     _reference = builder.CreateBlobAssetReference<CharacterStateController>(Allocator.Persistent);
     builder.Dispose();

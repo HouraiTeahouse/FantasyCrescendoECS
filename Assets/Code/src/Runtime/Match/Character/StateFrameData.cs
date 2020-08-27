@@ -5,6 +5,8 @@ using UnityEngine;
 using Unity.Assertions;
 using Unity.Entities;
 using Unity.Transforms;
+using UnityEngine.Animations;
+using UnityEngine.Playables;
 
 namespace HouraiTeahouse.FantasyCrescendo.Matches {
 
@@ -42,9 +44,15 @@ public struct CharacterStateTransition {
 
 public struct CharacterState {
   public BlobString Name;
+  public AnimationClipPlayable Animation;
   public BlobArray<CharacterFrame> Frames;
   public BlobArray<CharacterStateHitbox> Hitboxes;
   public BlobArray<CharacterStateTransition> Transitions;
+}
+
+public class CharacterControllerBuildParams {
+  public PlayableGraph Graph;
+  public Dictionary<StateFrameData, int> StateMap;
 }
 
 public class StateFrameData : ScriptableObject {
@@ -147,8 +155,10 @@ public class StateFrameData : ScriptableObject {
 #pragma warning restore 0649
 
   public CharacterState BuildState(ref BlobBuilder builder, 
-                                   Dictionary<StateFrameData, int> idMap) {
-    var state = new CharacterState();
+                                    CharacterControllerBuildParams builderParams) {
+    var state = new CharacterState {
+      Animation = AnimationClipPlayable.Create(builderParams.Graph, Animation)
+    };
     builder.AllocateString(ref state.Name, _name);
     builder.Construct(ref state.Frames, BuildFrames());
     builder.Construct(ref state.Hitboxes, BuildHitboxes(ref builder));
@@ -156,7 +166,7 @@ public class StateFrameData : ScriptableObject {
     var transitions = new List<CharacterStateTransition>();
     foreach (var transition in _transitions) {
       if (!transition.Enabled) continue;
-      transitions.Add(transition.ToStateTransition(ref builder, idMap));
+      transitions.Add(transition.ToStateTransition(ref builder, builderParams.StateMap));
     }
     builder.Construct(ref state.Transitions, transitions.ToArray());
     return state;

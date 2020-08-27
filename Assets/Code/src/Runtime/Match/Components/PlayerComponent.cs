@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using Unity.Entities;
+using UnityEngine.Playables;
 using Random = Unity.Mathematics.Random;
 
 namespace HouraiTeahouse.FantasyCrescendo.Matches {
@@ -16,9 +17,12 @@ public enum PlayerFlags : byte {
   EVENT_FLAGS   = HAS_DIED | HAS_RESPAWNED,
 }
 
-public struct PlayerComponent : IComponentData {
-
+public struct PlayerCharacter : IComponentData {
   public BlobAssetReference<CharacterStateController> StateController;
+  public PlayableGraph PlayableGraph;
+}
+
+public struct PlayerComponent : IComponentData {
 
   // 16 bytes
   public Random RNG;                          // 4 bytes
