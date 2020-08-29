@@ -8,16 +8,14 @@ using Unity.Physics;
 using Unity.Physics.Systems;
 using Unity.Transforms;
 
-public enum PhysicsEventState
-{
+public enum PhysicsEventState{
     Enter,
     Stay,
     Exit,
 }
 
 [Serializable]
-public struct TriggerEventBufferElement : IBufferElementData
-{
+public struct TriggerEventBufferElement : IBufferElementData{
     public Entity Entity;
     public PhysicsEventState State;
 
@@ -25,28 +23,23 @@ public struct TriggerEventBufferElement : IBufferElementData
 }
 
 [UpdateAfter(typeof(EndFramePhysicsSystem))]
-public class TriggerEventsSystem : SystemBase
-{
+public class TriggerEventsSystem : SystemBase{
     BuildPhysicsWorld _buildPhysicsWorldSystem;
     StepPhysicsWorld _stepPhysicsWorldSystem;
     EntityQuery _triggerEventsBufferEntityQuery;
 
     // todo; can maybe optimize by checking if chunk has changed?
     [BurstCompile]
-    struct TriggerEventsPreProcessJob : IJobChunk
-    {
+    struct TriggerEventsPreProcessJob : IJobChunk{
         public ArchetypeChunkBufferType<TriggerEventBufferElement> TriggerEventBufferType;
 
-        public void Execute(ArchetypeChunk chunk, int chunkIndex, int firstEntityIndex)
-        {
+        public void Execute(ArchetypeChunk chunk, int chunkIndex, int firstEntityIndex){
             BufferAccessor<TriggerEventBufferElement> triggerEventsBufferAccessor = chunk.GetBufferAccessor(TriggerEventBufferType);
 
-            for (int i = 0; i < chunk.Count; i++)
-            {
+            for (int i = 0; i < chunk.Count; i++){
                 DynamicBuffer<TriggerEventBufferElement> triggerEventsBuffer = triggerEventsBufferAccessor[i];
 
-                for (int j = triggerEventsBuffer.Length - 1; j >= 0; j--)
-                {
+                for (int j = triggerEventsBuffer.Length - 1; j >= 0; j--){
                     TriggerEventBufferElement triggerEventElement = triggerEventsBuffer[j];
                     triggerEventElement._isStale = true;
                     triggerEventsBuffer[j] = triggerEventElement;
@@ -56,30 +49,24 @@ public class TriggerEventsSystem : SystemBase
     }
 
     [BurstCompile]
-    struct TriggerEventsJob : ITriggerEventsJob
-    {
+    struct TriggerEventsJob : ITriggerEventsJob{
         public BufferFromEntity<TriggerEventBufferElement> TriggerEventBufferFromEntity;
 
-        public void Execute(TriggerEvent triggerEvent)
-        {
+        public void Execute(TriggerEvent triggerEvent){
             ProcessForEntity(triggerEvent.Entities.EntityA, triggerEvent.Entities.EntityB);
             ProcessForEntity(triggerEvent.Entities.EntityB, triggerEvent.Entities.EntityA);
         }
 
-        private void ProcessForEntity(Entity entity, Entity otherEntity)
-        {
-            if(TriggerEventBufferFromEntity.Exists(entity))
-            {
+        private void ProcessForEntity(Entity entity, Entity otherEntity){
+            if(TriggerEventBufferFromEntity.Exists(entity)){
                 DynamicBuffer<TriggerEventBufferElement> triggerEventBuffer = TriggerEventBufferFromEntity[entity];
 
                 bool foundMatch = false;
-                for (int i = 0; i < triggerEventBuffer.Length; i++)
-                {
+                for (int i = 0; i < triggerEventBuffer.Length; i++){
                     TriggerEventBufferElement triggerEvent = triggerEventBuffer[i];
 
                     // If entity is already there, update to Stay
-                    if (triggerEvent.Entity == otherEntity)
-                    {
+                    if (triggerEvent.Entity == otherEntity){
                         foundMatch = true;
                         triggerEvent.State = PhysicsEventState.Stay;
                         triggerEvent._isStale = false;
@@ -90,10 +77,8 @@ public class TriggerEventsSystem : SystemBase
                 }
 
                 // If it's a new entity, add as Enter
-                if(!foundMatch)
-                {
-                    triggerEventBuffer.Add(new TriggerEventBufferElement
-                    {
+                if(!foundMatch){
+                    triggerEventBuffer.Add(new TriggerEventBufferElement{
                         Entity = otherEntity,
                         State = PhysicsEventState.Enter,
                         _isStale = false,
@@ -104,30 +89,23 @@ public class TriggerEventsSystem : SystemBase
     }
 
     [BurstCompile]
-    struct TriggerEventsPostProcessJob : IJobChunk
-    {
+    struct TriggerEventsPostProcessJob : IJobChunk{
         public ArchetypeChunkBufferType<TriggerEventBufferElement> TriggerEventBufferType;
 
-        public void Execute(ArchetypeChunk chunk, int chunkIndex, int firstEntityIndex)
-        {
+        public void Execute(ArchetypeChunk chunk, int chunkIndex, int firstEntityIndex){
             BufferAccessor<TriggerEventBufferElement> triggerEventsBufferAccessor = chunk.GetBufferAccessor(TriggerEventBufferType);
 
-            for (int i = 0; i < chunk.Count; i++)
-            {
+            for (int i = 0; i < chunk.Count; i++){
                 DynamicBuffer<TriggerEventBufferElement> triggerEventsBuffer = triggerEventsBufferAccessor[i];
 
-                for (int j = triggerEventsBuffer.Length - 1; j >= 0; j--)
-                {
+                for (int j = triggerEventsBuffer.Length - 1; j >= 0; j--){
                     TriggerEventBufferElement triggerEvent = triggerEventsBuffer[j];
 
-                    if (triggerEvent._isStale)
-                    {
-                        if (triggerEvent.State == PhysicsEventState.Exit)
-                        {
+                    if (triggerEvent._isStale){
+                        if (triggerEvent.State == PhysicsEventState.Exit){
                             triggerEventsBuffer.RemoveAt(j);
                         }
-                        else
-                        {
+                        else{
                             triggerEvent.State = PhysicsEventState.Exit;
                             triggerEventsBuffer[j] = triggerEvent;
                         }
@@ -137,15 +115,12 @@ public class TriggerEventsSystem : SystemBase
         }
     }
 
-    protected override void OnCreate()
-    {
+    protected override void OnCreate(){
         _buildPhysicsWorldSystem = World.GetOrCreateSystem<BuildPhysicsWorld>();
         _stepPhysicsWorldSystem = World.GetOrCreateSystem<StepPhysicsWorld>();
 
-        EntityQueryDesc queryDesc = new EntityQueryDesc
-        {
-            All = new ComponentType[]
-            {
+        EntityQueryDesc queryDesc = new EntityQueryDesc{
+            All = new ComponentType[]{
                 typeof(PhysicsCollider),
                 typeof(TriggerEventBufferElement),
             }
@@ -154,20 +129,16 @@ public class TriggerEventsSystem : SystemBase
         _triggerEventsBufferEntityQuery = GetEntityQuery(queryDesc);
     }
 
-    protected override void OnUpdate()
-    {
-        Dependency = new TriggerEventsPreProcessJob
-        {
+    protected override void OnUpdate(){
+        Dependency = new TriggerEventsPreProcessJob{
             TriggerEventBufferType = GetArchetypeChunkBufferType<TriggerEventBufferElement>(),
         }.ScheduleParallel(_triggerEventsBufferEntityQuery, Dependency);
 
-        Dependency = new TriggerEventsJob
-        {
+        Dependency = new TriggerEventsJob{
             TriggerEventBufferFromEntity = GetBufferFromEntity<TriggerEventBufferElement>(),
         }.Schedule(_stepPhysicsWorldSystem.Simulation, ref _buildPhysicsWorldSystem.PhysicsWorld, Dependency);
 
-        Dependency = new TriggerEventsPostProcessJob
-        {
+        Dependency = new TriggerEventsPostProcessJob{
             TriggerEventBufferType = GetArchetypeChunkBufferType<TriggerEventBufferElement>(),
         }.ScheduleParallel(_triggerEventsBufferEntityQuery, Dependency);
     }
