@@ -3,7 +3,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 
 namespace HouraiTeahouse.FantasyCrescendo.Matches {
-
+/*
 [UpdateInGroup(typeof(SimulationSystemGroup))]
 [UpdateBefore(typeof(TransformSystemGroup))]
 public class PlayerMovementSystem : SystemBase {
@@ -15,6 +15,6 @@ public class PlayerMovementSystem : SystemBase {
     }).Schedule();
   }
 
-}
+}*/
 
 }

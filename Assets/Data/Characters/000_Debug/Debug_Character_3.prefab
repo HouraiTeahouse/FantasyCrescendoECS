@@ -7,11 +7,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 179798011180491953, guid: 97dc40ad494bbfc4e87d07a4ed5ac570,
-        type: 3}
-      propertyPath: m_Materials.Array.data[0]
-      value: 
-      objectReference: {fileID: 2100000, guid: 10b01672dfafc9f439ea956768e7f86b, type: 2}
     - target: {fileID: 179798011381033369, guid: 97dc40ad494bbfc4e87d07a4ed5ac570,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -81,6 +76,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 10b01672dfafc9f439ea956768e7f86b, type: 2}
+      objectReference: {fileID: 2100000, guid: 0aa38b6c7f90b104fa4b1cf3933ed1de, type: 2}
+<<<<<<< Updated upstream
+    m_RemovedComponents:
+    - {fileID: 5908650909437222687, guid: 97dc40ad494bbfc4e87d07a4ed5ac570, type: 3}
+=======
     m_RemovedComponents: []
+>>>>>>> Stashed changes
   m_SourcePrefab: {fileID: 100100000, guid: 97dc40ad494bbfc4e87d07a4ed5ac570, type: 3}

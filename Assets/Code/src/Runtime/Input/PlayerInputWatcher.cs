@@ -108,7 +108,7 @@ public class PlayerInputWatcher : MonoBehaviour {
   public PlayerInput GetLatestInputs() {
     var buttons = (PlayerInput.Button)0;
     foreach (var kvp in _buttons) {
-      if (kvp.Value.ReadValue<bool>()) {
+      if (kvp.Value.ReadValue<float>()>0) {
         buttons |= kvp.Key;
       }
     }
