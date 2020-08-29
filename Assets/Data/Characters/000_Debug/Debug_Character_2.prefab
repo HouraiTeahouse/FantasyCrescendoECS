@@ -198,7 +198,11 @@ MonoBehaviour:
   airFriction: 1
   facing: 0
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 --- !u!114 &8117229117450867233
+=======
+--- !u!114 &5908650909437222687
+>>>>>>> Stashed changes
 =======
 --- !u!114 &5908650909437222687
 >>>>>>> Stashed changes
@@ -211,7 +215,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   m_Script: {fileID: 11500000, guid: 833bc93cb69af604592602b5b97232ee, type: 3}
+=======
+  m_Script: {fileID: 11500000, guid: f9bb21bad13b28b469cec5ee1bd6e216, type: 3}
+>>>>>>> Stashed changes
 =======
   m_Script: {fileID: 11500000, guid: f9bb21bad13b28b469cec5ee1bd6e216, type: 3}
 >>>>>>> Stashed changes

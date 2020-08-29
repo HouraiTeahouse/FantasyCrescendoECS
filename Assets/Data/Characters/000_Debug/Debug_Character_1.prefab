@@ -1,7 +1,11 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 --- !u!114 &-8676903947191968386
+=======
+--- !u!114 &-2779167510061947029
+>>>>>>> Stashed changes
 =======
 --- !u!114 &-2779167510061947029
 >>>>>>> Stashed changes
@@ -18,7 +22,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   triggered: 0
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
 --- !u!114 &2864874117177577101
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -31,6 +38,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9bb21bad13b28b469cec5ee1bd6e216, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 --- !u!114 &3708479743902215033
 MonoBehaviour:
@@ -192,7 +202,11 @@ MonoBehaviour:
   m_SerializedVersion: 1
   m_ConvexRadius_Deprecated: -1
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 --- !u!114 &4023301722443666003
+=======
+--- !u!114 &5723400730687824049
+>>>>>>> Stashed changes
 =======
 --- !u!114 &5723400730687824049
 >>>>>>> Stashed changes
@@ -212,6 +226,7 @@ MonoBehaviour:
   airAcceleration: 2
   maxAirSpeed: 10
   maxFallSpeed: 20
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
   maxFastFallSpeed: 40
   weight: 1
@@ -234,6 +249,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
 =======
+=======
+>>>>>>> Stashed changes
   maxFastFallSpeed: 30
   weight: 1
   jumpForce: 20
@@ -242,6 +259,9 @@ MonoBehaviour:
   groundedFriction: 2
   airFriction: 1
   facing: 0
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 --- !u!1001 &2701101358100396659
 PrefabInstance:
@@ -259,6 +279,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_PrimitiveOrientation.Value.z
       value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 4654879356307040433, guid: 2daedebfb530828469c5929edc652733,
+        type: 3}
+      propertyPath: m_Material.m_Friction.m_Value.Value
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4654879356307040433, guid: 2daedebfb530828469c5929edc652733,
         type: 3}
