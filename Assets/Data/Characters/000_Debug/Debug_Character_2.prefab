@@ -1,5 +1,230 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-1253519774692040647
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 179798011381033370}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20211a969be97c34e89c2edb187b572d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  triggered: 0
+--- !u!114 &484961664597444138
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 179798011381033370}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b275e5f92732148048d7b77e264ac30e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ShapeType: 0
+  m_PrimitiveCenter:
+    x: 0
+    y: -0.1
+    z: 0
+  m_PrimitiveSize:
+    x: 0.5
+    y: 0.2
+    z: 1
+  m_PrimitiveOrientation:
+    Value:
+      x: 0
+      y: 0
+      z: 0
+    RotationOrder: 4
+  m_Capsule:
+    Height: 1
+    Radius: 0.25
+    Axis: 2
+  m_Cylinder:
+    Height: 1
+    Radius: 0.25
+    Axis: 2
+  m_CylinderSideCount: 20
+  m_SphereRadius: 0.5
+  m_MinimumSkinnedVertexWeight: 0.1
+  m_ConvexHullGenerationParameters:
+    m_SimplificationTolerance: 0.015
+    m_BevelRadius: 0
+    m_MinimumAngle: 2.5000002
+  m_CustomMesh: {fileID: 0}
+  m_ForceUnique: 0
+  m_Material:
+    m_SupportsTemplate: 1
+    m_Template: {fileID: 0}
+    m_CollisionResponse:
+      m_Override: 0
+      m_Value: 3
+    m_Friction:
+      m_Override: 0
+      m_Value:
+        Value: 0.5
+        CombineMode: 0
+    m_Restitution:
+      m_Override: 0
+      m_Value:
+        Value: 0
+        CombineMode: 2
+    m_BelongsToCategories:
+      m_Override: 0
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CollidesWithCategories:
+      m_Override: 0
+      m_Value:
+        Category00: 1
+        Category01: 1
+        Category02: 1
+        Category03: 1
+        Category04: 1
+        Category05: 1
+        Category06: 1
+        Category07: 1
+        Category08: 1
+        Category09: 1
+        Category10: 1
+        Category11: 1
+        Category12: 1
+        Category13: 1
+        Category14: 1
+        Category15: 1
+        Category16: 1
+        Category17: 1
+        Category18: 1
+        Category19: 1
+        Category20: 1
+        Category21: 1
+        Category22: 1
+        Category23: 1
+        Category24: 1
+        Category25: 1
+        Category26: 1
+        Category27: 1
+        Category28: 1
+        Category29: 1
+        Category30: 1
+        Category31: 1
+    m_CustomMaterialTags:
+      m_Override: 0
+      m_Value:
+        Tag00: 0
+        Tag01: 0
+        Tag02: 0
+        Tag03: 0
+        Tag04: 0
+        Tag05: 0
+        Tag06: 0
+        Tag07: 0
+    m_SerializedVersion: 1
+    m_BelongsTo_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CollidesWith_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_CustomTags_Deprecated:
+      m_Override: 0
+      m_Value: 
+    m_IsTrigger_Deprecated:
+      m_Override: 0
+      m_Value: 0
+    m_RaisesCollisionEvents_Deprecated:
+      m_Override: 0
+      m_Value: 0
+  m_SerializedVersion: 1
+  m_ConvexRadius_Deprecated: -1
+--- !u!114 &5232017264314249998
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 179798011381033370}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e95b4143cf7a1e3458852e79fe327f9b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  groundedAcceleration: 5
+  maxSpeed: 10
+  airAcceleration: 2
+  maxAirSpeed: 10
+  maxFallSpeed: 20
+  maxFastFallSpeed: 30
+  weight: 1
+  jumpForce: 20
+  currentAirJumps: 0
+  maxAirJumps: 2
+  groundedFriction: 2
+  airFriction: 1
+  facing: 0
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+--- !u!114 &8117229117450867233
+=======
+--- !u!114 &5908650909437222687
+>>>>>>> Stashed changes
+=======
+--- !u!114 &5908650909437222687
+>>>>>>> Stashed changes
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 179798011381033370}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+  m_Script: {fileID: 11500000, guid: 833bc93cb69af604592602b5b97232ee, type: 3}
+=======
+  m_Script: {fileID: 11500000, guid: f9bb21bad13b28b469cec5ee1bd6e216, type: 3}
+>>>>>>> Stashed changes
+=======
+  m_Script: {fileID: 11500000, guid: f9bb21bad13b28b469cec5ee1bd6e216, type: 3}
+>>>>>>> Stashed changes
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &7965720745038637079
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -15,7 +240,12 @@ PrefabInstance:
     - target: {fileID: 4654879356307040433, guid: 2daedebfb530828469c5929edc652733,
         type: 3}
       propertyPath: m_PrimitiveOrientation.Value.z
-      value: 90
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 4654879356307040433, guid: 2daedebfb530828469c5929edc652733,
+        type: 3}
+      propertyPath: m_Material.m_Friction.m_Value.Value
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7851227183246524813, guid: 2daedebfb530828469c5929edc652733,
         type: 3}
@@ -82,5 +312,26 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 3b9a33a0841ced54bb184665f7c25d3e, type: 2}
+    - target: {fileID: 8445335090438960598, guid: 2daedebfb530828469c5929edc652733,
+        type: 3}
+      propertyPath: m_LinearDamping
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8445335090438960598, guid: 2daedebfb530828469c5929edc652733,
+        type: 3}
+      propertyPath: m_AngularDamping
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8445335090438960598, guid: 2daedebfb530828469c5929edc652733,
+        type: 3}
+      propertyPath: m_GravityFactor
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2daedebfb530828469c5929edc652733, type: 3}
+--- !u!1 &179798011381033370 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7851227183246524813, guid: 2daedebfb530828469c5929edc652733,
+    type: 3}
+  m_PrefabInstance: {fileID: 7965720745038637079}
+  m_PrefabAsset: {fileID: 0}
