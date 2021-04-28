@@ -1,3 +1,5 @@
+using HouraiTeahouse.FantasyCrescendo;
+using HouraiTeahouse.FantasyCrescendo.Matches;
 using HouraiTeahouse.FantasyCrescendo.Utils;
 using System;
 using Unity.Assertions;
@@ -10,6 +12,14 @@ using Unity.Transforms;
 using Unity.Entities;
 
 using Hash = System.UInt64;
+
+[assembly: RegisterGenericJobType(typeof(HashWorldSystem.HashComponentsJob<PlayerComponent>))]
+[assembly: RegisterGenericJobType(typeof(HashWorldSystem.HashComponentsJob<Translation>))]
+[assembly: RegisterGenericJobType(typeof(HashWorldSystem.HashComponentsJob<Rotation>))]
+[assembly: RegisterGenericJobType(typeof(HashWorldSystem.HashComponentsJob<Scale>))]
+[assembly: RegisterGenericJobType(typeof(HashWorldSystem.HashComponentsJob<HitboxState>))]
+[assembly: RegisterGenericJobType(typeof(HashWorldSystem.HashComponentsJob<Hitbox>))]
+[assembly: RegisterGenericJobType(typeof(HashWorldSystem.HashComponentsJob<Hurtbox>))]
 
 namespace HouraiTeahouse.FantasyCrescendo.Matches {
 
@@ -82,17 +92,17 @@ public class HashWorldSystem : SystemBase {
     var query = GetEntityQuery(ComponentType.ReadOnly<T>());
     return new HashComponentsJob<T> {
       Index = index,
-      EntityHandle = EntityManager.GetArchetypeChunkEntityType(),
-      ComponentHandle = GetArchetypeChunkComponentType<T>(true),
+      EntityHandle = EntityManager.GetEntityTypeHandle(),
+      ComponentHandle = GetComponentTypeHandle<T>(true),
       Results = writer
     }.ScheduleParallel(query, Dependency);
   }
 
   [BurstCompile]
-  struct HashComponentsJob<T> : IJobChunk where T : struct, IComponentData {
+  public struct HashComponentsJob<T> : IJobChunk where T : struct, IComponentData {
     public int Index;
-    [ReadOnly] public ArchetypeChunkEntityType EntityHandle;
-    [ReadOnly] public ArchetypeChunkComponentType<T> ComponentHandle;
+    [ReadOnly] public EntityTypeHandle EntityHandle;
+    [ReadOnly] public ComponentTypeHandle<T> ComponentHandle;
     [NativeDisableContainerSafetyRestriction]
     public NativeMultiHashMap<int, HashResult>.ParallelWriter Results;
 

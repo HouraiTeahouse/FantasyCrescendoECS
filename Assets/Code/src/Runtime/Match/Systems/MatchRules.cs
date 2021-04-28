@@ -129,7 +129,7 @@ public class PlayerRespawnSystem : SystemBase {
 
   protected override void OnUpdate() {
     NativeArray<Translation> respawnPoints = _respawnPoints.AsArray();
-    var ecb = _ecbSystem.CreateCommandBuffer().ToConcurrent();
+    var ecb = _ecbSystem.CreateCommandBuffer().AsParallelWriter();
 
     // FIXME(james7132): This has the potential for mulitple players to respawn at the 
     // same point. 
