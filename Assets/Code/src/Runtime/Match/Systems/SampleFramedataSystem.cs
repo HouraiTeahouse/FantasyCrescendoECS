@@ -1,7 +1,11 @@
-﻿using Unity.Physics.Systems;
+﻿using Unity.Entities;
+using Unity.Jobs;
 using Unity.Mathematics;
-using Unity.Entities;
+using Unity.Physics.Systems;
 using Unity.Transforms;
+using UnityEngine;
+using UnityEngine.Animations;
+using UnityEngine.Playables;
 
 namespace HouraiTeahouse.FantasyCrescendo.Matches {
 
@@ -11,46 +15,60 @@ namespace HouraiTeahouse.FantasyCrescendo.Matches {
 public class SampleFrameDataSystem : SystemBase {
 
   protected override void OnUpdate() {
-    var entityManager = World.EntityManager;
+    float deltaTime = Time.fixedDeltaTime;
 
-    var players = GetComponentDataFromEntity<PlayerComponent>(true);
-    var frames = GetComponentDataFromEntity<CharacterFrame>(true);
-
-    Entities
-    .WithName("SampleNames")
-    .ForEach((ref PlayerComponent player, ref CharacterFrame frame) => {
+    var sampleJob = Entities
+    .WithName("SampleFrames")
+    .ForEach((ref PlayerComponent player, ref CharacterFrame frame, in PlayerCharacter character) => {
       player.StateTick++;
-      bool validState = GetState(player, out CharacterState state);
+      bool validState = GetState(player, character, out CharacterState state);
       if (!validState) return;
       frame = state.Frames[math.min(player.StateTick, state.Frames.Length - 1)];
-    }).Schedule();
+    }).Schedule(Dependency);
 
-    Entities
+    var hitboxJob = Entities
     .WithName("UpdateHitboxes")
-    .WithReadOnly(players)
-    .WithReadOnly(frames)
-    .ForEach((ref Hitbox hitbox, ref HitboxState state, ref Translation translation, ref Scale scale) => {
+    .ForEach((ref Hitbox hitbox, ref HitboxState state, ref Translation translation) => {
       var player = state.Player;
-      if (!players.HasComponent(player) || !frames.HasComponent(player)) return;
-      state.Enabled = frames[state.Player].IsHitboxActive((int)state.ID);
+      if (!HasComponent<PlayerComponent>(player) || 
+          !HasComponent<PlayerCharacter>(player) || 
+          !HasComponent<CharacterFrame>(player)) return;
+      state.Enabled = GetComponent<CharacterFrame>(player).IsHitboxActive((int)state.ID);
       if (!state.Enabled) {
         state.PreviousPosition = null;
       }
 
-      bool validState = GetState(players[player], out CharacterState playerState);
+      var playerComponent = GetComponent<PlayerComponent>(player);
+      var character = GetComponent<PlayerCharacter>(player);
+      bool validState = GetState(playerComponent, character, out CharacterState playerState);
       if (!validState || state.ID >= playerState.Hitboxes.Length) return;
-      var data = playerState.Hitboxes[state.ID];
+      ref CharacterStateHitbox data = ref playerState.Hitboxes[state.ID];
       hitbox = data.Hitbox;
-      translation = data.Translation;
-      scale = data.Scale;
-    }).ScheduleParallel();
+      translation = data.Positions[math.min(playerComponent.StateTick, data.Positions.Length - 1)];
+    }).ScheduleParallel(sampleJob);
+
+    var animationJob = Entities
+    .WithName("SampleAnimations")
+    .WithoutBurst()
+    .ForEach((in PlayerComponent player, in PlayerCharacter character) => {
+      bool validState = GetState(player, character, out CharacterState state);
+      if (!validState) return;
+      var graph = character.PlayableGraph;
+      if (!graph.IsValid()) return;
+      AnimationClipPlayable clip = state.Animation;
+      clip.SetTime(player.StateTick * deltaTime);
+      graph.GetOutputByType<AnimationPlayableOutput>(0).SetSourcePlayable(clip);
+      character.PlayableGraph.Evaluate();
+    }).ScheduleParallel(sampleJob);
+
+    Dependency = JobHandle.CombineDependencies(animationJob, hitboxJob);
   }
 
-  static bool GetState(in PlayerComponent player, out CharacterState state) {
+  static bool GetState(in PlayerComponent player, in PlayerCharacter character, out CharacterState state) {
     state = new CharacterState();
     var stateId = player.StateID;
-    if (!player.StateController.IsCreated || stateId < 0) return false;
-    ref var states = ref player.StateController.Value.States;
+    if (!character.StateController.IsCreated || stateId < 0) return false;
+    ref var states = ref character.StateController.Value.States;
     if (states.Length == 0) return false;
     state = ref states[stateId];
     return true;

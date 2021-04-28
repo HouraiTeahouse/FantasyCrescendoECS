@@ -15,13 +15,15 @@ public sealed class ReplayWriter : IDisposable {
   // Magic Header for the file type: "ddDa"
   // The first four notes of Megalovania.
   public static readonly byte[] kMagicHeader = new byte[] { 0x64, 0x64, 0x44, 0x61 };
+  readonly MatchConfig _config;
   readonly BinaryWriter _writer;
 
   /// <summary>
   /// Creatse a ReplayWriter.
   /// </summary>
   /// <param name="writer">A BinaryWriter implementation, takes ownership of it.</param>
-  public ReplayWriter(BinaryWriter writer) {
+  public ReplayWriter(MatchConfig config, BinaryWriter writer) {
+    _config = config;
     _writer = writer;
   }
 
@@ -35,10 +37,10 @@ public sealed class ReplayWriter : IDisposable {
   /// Writes a frame of input to the file.
   /// </summary>
   /// <param name="inputs">a frame of input to write.</param>
-  public unsafe void WriteInputs(NativeArray<PlayerInput> inputs) {
-    Assert.IsTrue(inputs.Length == MatchConfig.kMaxSupportedPlayers);
-    var ptr = (byte*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(inputs);
-    int size = MatchConfig.kMaxSupportedPlayers * UnsafeUtility.SizeOf<PlayerInput>();
+  public unsafe void WriteInputs(NativeSlice<PlayerInput> inputs) {
+    Assert.IsTrue(inputs.Length == _config.PlayerCount);
+    var ptr = (byte*)NativeSliceUnsafeUtility.GetUnsafeReadOnlyPtr(inputs);
+    int size = _config.PlayerCount * UnsafeUtility.SizeOf<PlayerInput>();
     _writer.Write(XXHash.Hash64(ptr, size));
     _writer.WriteBytes(ptr, size);
   }
@@ -57,9 +59,11 @@ public sealed class ReplayWriter : IDisposable {
 public sealed class ReplayReader : IDisposable {
 
   public static readonly byte[] kMagicHeader = ReplayWriter.kMagicHeader;
+  readonly MatchConfig _config;
   readonly BinaryReader _reader;
 
-  public ReplayReader(BinaryReader reader) {
+  public ReplayReader(MatchConfig config, BinaryReader reader) {
+    _config = config;
     _reader = reader;
   }
 
@@ -73,10 +77,10 @@ public sealed class ReplayReader : IDisposable {
   /// Reads a frame of input to the file.
   /// </summary>
   /// <param name="inputs">a frame of input to read.</param>
-  public unsafe void ReadInputs(NativeArray<PlayerInput> inputs) {
-    Assert.IsTrue(inputs.Length == MatchConfig.kMaxSupportedPlayers);
-    var ptr = (byte*)NativeArrayUnsafeUtility.GetUnsafePtr(inputs);
-    int size = MatchConfig.kMaxSupportedPlayers * UnsafeUtility.SizeOf<PlayerInput>();
+  public unsafe void ReadInputs(NativeSlice<PlayerInput> inputs) {
+    Assert.IsTrue(inputs.Length == _config.PlayerCount);
+    var ptr = (byte*)NativeSliceUnsafeUtility.GetUnsafePtr(inputs);
+    int size = _config.PlayerCount * UnsafeUtility.SizeOf<PlayerInput>();
     ulong checksum = _reader.ReadULong();
     _reader.ReadBytes(ptr, size);
     ulong hash = XXHash.Hash64(ptr, size);

@@ -12,8 +12,6 @@ namespace HouraiTeahouse.FantasyCrescendo.Matches {
 
 public struct HitboxCollision : IComparable<HitboxCollision> {
   public Entity OriginPlayer;
-  public Entity TargetPlayer;
-
   public Hitbox Hitbox;
   public Hurtbox Hurtbox;
 
@@ -48,41 +46,42 @@ public class HitboxCollisionSystem : SystemBase {
     NativeMultiHashMap<Entity, HitboxCollision> collisions = _collisions;
     collisions.Clear();
     var collisionWriter = collisions.AsParallelWriter();
-    var hurtboxes = GetComponentDataFromEntity<Hurtbox>(true);
 
     Entities
     .WithName("QueryHitboxCollisons")
     .WithReadOnly(physicsWorld)
-    .WithReadOnly(hurtboxes)
     .ForEach((Entity entity, ref Hitbox hitbox, ref HitboxState state, in LocalToWorld transform) => {
       if (!state.Enabled) return;
 
-      float3 position = TransformPoint(transform.Value, float3.zero);
-      var hits = new NativeList<ColliderCastHit>(Allocator.Temp);
-      physicsWorld.CastCollider(new ColliderCastInput {
-        Collider = (Collider*)SphereCollider.Create(new SphereGeometry {
+      BlobAssetReference<Collider> collider = 
+        SphereCollider.Create(new SphereGeometry {
           Center = float3.zero,
           Radius = hitbox.Radius
         }, new CollisionFilter {
           BelongsTo = (uint)PhysicsLayers.HITBOX,
           CollidesWith = (uint)PhysicsLayers.HITBOX,
-        }).GetUnsafePtr(),
+        });
+
+      float3 position = math.transform(transform.Value, float3.zero);
+      var hits = new NativeList<ColliderCastHit>(Allocator.Temp);
+      physicsWorld.CastCollider(new ColliderCastInput {
+        Collider = (Collider*)collider.GetUnsafePtr(),
         Start = state.PreviousPosition ?? position,
         End = position,
         Orientation = float4.zero
       }, ref hits);
+      collider.Dispose();
+
       state.PreviousPosition = position;
 
       for (var i = 0; i < hits.Length; i++) {
         var hit = hits[i];
-        if (!hurtboxes.HasComponent(hit.Entity)) continue;
-        Hurtbox hurtbox = hurtboxes[hit.Entity];
+        if (!HasComponent<Hurtbox>(hit.Entity)) continue;
+        var hurtbox = GetComponent<Hurtbox>(hit.Entity);
         if (!hurtbox.Enabled || hurtbox.Player == Entity.Null || hurtbox.Player == state.Player) continue;
 
-        collisionWriter.Add(hit.Entity, new HitboxCollision {
+        collisionWriter.Add(hurtbox.Player, new HitboxCollision {
           OriginPlayer = entity,
-          TargetPlayer = hurtbox.Player,
-
           Hitbox = hitbox,
           Hurtbox = hurtbox,
         });
@@ -104,11 +103,6 @@ public class HitboxCollisionSystem : SystemBase {
 
   protected override void OnDestroy() {
     _collisions.Dispose();
-  }
-
-  static float3 TransformPoint(in float4x4 mat, in float3 p) {
-    float4 point = math.mul(mat, new float4(p, 1f));
-    return point.xyz * (1f / point.w);
   }
 
 }

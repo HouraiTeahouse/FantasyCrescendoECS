@@ -6,28 +6,54 @@ using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Authoring;
 using Unity.Transforms;
+using UnityEngine.Playables;
+using UnityEngine.Animations;
 
 namespace HouraiTeahouse.FantasyCrescendo.Authoring {
 
 [RequireComponent(typeof(PhysicsBodyAuthoring))]
 public class Player : MonoBehaviour, IConvertGameObjectToEntity {
 
-  [System.NonSerialized] public uint PlayerID;
+  [System.NonSerialized] public byte PlayerID;
 
 #pragma warning disable 0649
   [SerializeField] CharacterFrameData _frameData;
 #pragma warning restore 0649
+
+  PlayableGraph _graph;
+
+  void OnDestroy() {
+    if (_graph.IsValid()) {
+      _graph.Destroy();
+    }
+  }
   
   public void Convert(Entity entity, EntityManager entityManager, 
                       GameObjectConversionSystem conversionSystem) {
+    _graph = PlayableGraph.Create();
+    _graph.SetTimeUpdateMode(DirectorUpdateMode.Manual);
+
+    var animator = GetComponentInChildren<Animator>();
+    AnimationPlayableOutput.Create(_graph, name + " Animation", animator);
+
     entityManager.AddComponent(entity, typeof(PlayerConfig));
+    entityManager.AddComponent(entity, typeof(PlayerComponent));
     entityManager.AddComponent(entity, typeof(PlayerInputComponent));
     entityManager.AddComponent(entity, typeof(CharacterFrame));
-    entityManager.AddComponentData(entity, new PlayerComponent {
+    entityManager.AddComponent(entity, typeof(CameraTarget));
+    // Copy the player's position and transforms from the Entity to the GameObject
+    entityManager.AddComponentData(entity, new PlayerCharacter {
+      PlayableGraph = _graph,
       StateController = _frameData != null ? 
-        _frameData.BuildController() : 
+        _frameData.BuildController(new CharacterControllerBuildParams {
+          Graph = _graph
+        }) : 
         default(BlobAssetReference<CharacterStateController>)
     });
+
+    // Copy the player's position and transforms from the Entity to the GameObject
+    entityManager.AddComponent<CopyTransformToGameObject>(entity);
+    entityManager.AddComponentObject(entity, transform);
 
     // Allocate player hitboxes for immediate player use.
     CreatePlayerHitboxes(entity, entityManager, CharacterFrame.kMaxPlayerHitboxCount);
@@ -35,8 +61,16 @@ public class Player : MonoBehaviour, IConvertGameObjectToEntity {
     // Constrain players to only allow for X/Y movement and zero rotation.
     conversionSystem.World.GetOrCreateSystem<EndJointConversionSystem>().CreateJointEntity(
         this, new PhysicsConstrainedBodyPair(conversionSystem.GetPrimaryEntity(this), Entity.Null, false),
-        CreateRigidbodConstraints(Math.DecomposeRigidBodyTransform(transform.localToWorldMatrix))
+        CreateRigidbodyConstraints(Math.DecomposeRigidBodyTransform(transform.localToWorldMatrix))
     );
+
+    // Copy bone positions and transforms from the GameObject to the Entities
+    foreach (var child in GetComponentsInChildren<Transform>()) {
+      if (child == transform) continue;
+      Entity childEntity = conversionSystem.GetPrimaryEntity(child.gameObject);
+      entityManager.AddComponent<CopyTransformFromGameObject>(childEntity);
+      entityManager.AddComponentObject(childEntity, child);
+    }
   }
 
   void CreatePlayerHitboxes(Entity player, EntityManager entityManager, int size) {
@@ -46,9 +80,12 @@ public class Player : MonoBehaviour, IConvertGameObjectToEntity {
       typeof(Hitbox), typeof(HitboxState));
 
     var group = new NativeArray<LinkedEntityGroup>(size, Allocator.Temp);
-    for (var i = 0; i < size; i++) {
+    for (byte i = 0; i < size; i++) {
       var entity = entityManager.CreateEntity(archetype);
       entityManager.AddComponentData(entity, new Scale { Value = 1.0f });
+      entityManager.AddComponentData(entity, new Hitbox {
+        Radius = 1,
+      });
       entityManager.AddComponentData(entity, new Parent { Value = player });
       entityManager.AddComponentData(entity, new HitboxState {
         Player = player,
@@ -67,7 +104,7 @@ public class Player : MonoBehaviour, IConvertGameObjectToEntity {
     entityManager.AddBuffer<LinkedEntityGroup>(player).AddRange(group);
   }
 
-  PhysicsJoint CreateRigidbodConstraints(RigidTransform offset) {
+  PhysicsJoint CreateRigidbodyConstraints(RigidTransform offset) {
     var joint = new PhysicsJoint {
       BodyAFromJoint = BodyFrame.Identity,
       BodyBFromJoint = offset

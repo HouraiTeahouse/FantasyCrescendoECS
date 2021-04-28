@@ -9,8 +9,7 @@ using Random = Unity.Mathematics.Random;
 
 namespace HouraiTeahouse.FantasyCrescendo.Matches {
 
-[UpdateInGroup(typeof(SimulationSystemGroup))]
-[UpdateBefore(typeof(EndSimulationEntityCommandBufferSystem))]
+[UpdateInGroup(typeof(LateSimulationSystemGroup))]
 public class MatchRuleSystemGroup : ComponentSystemGroup {
 }
 
@@ -77,7 +76,7 @@ public class TimeMatchRuleSystem : MatchRuleSystem {
 
 }
 
-[UpdateInGroup(typeof(SimulationSystemGroup))]
+[UpdateInGroup(typeof(LateSimulationSystemGroup))]
 [UpdateBefore(typeof(MatchRuleSystemGroup))]
 public class BlastZoneSystem : MatchRuleSystem {
 
@@ -115,7 +114,8 @@ public class BlastZoneSystem : MatchRuleSystem {
 
 }
 
-[UpdateInGroup(typeof(LateSimulationSystemGroup), OrderLast = true)]
+[UpdateInGroup(typeof(LateSimulationSystemGroup))]
+[UpdateAfter(typeof(MatchRuleSystemGroup))]
 public class PlayerRespawnSystem : SystemBase {
 
   NativeList<Translation> _respawnPoints;

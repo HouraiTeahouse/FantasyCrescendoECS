@@ -17,10 +17,11 @@ public struct ScalableValue {
 [Serializable]
 public enum HurtboxType : byte {
   INACTIVE   = 1,
-  INTANGIBLE = 2,
-  INVINCIBLE = 3,
-  GRAZING    = 4,
-  SHIELD     = 5,
+  DAMAGEABLE = 2,
+  INTANGIBLE = 3,
+  INVINCIBLE = 4,
+  GRAZING    = 5,
+  SHIELD     = 6,
 }
 
 [Flags]
@@ -30,15 +31,16 @@ public enum HitboxFlags : byte {
   TRASCENDENT_PRIORITY = 1 << 1,
 }
 
+[Serializable]
 public struct HitboxState : IComponentData {
   public Entity Player;
-  public int ID;
-  public uint PlayerID;
+  public byte ID;
+  public byte PlayerID;
   public bool Enabled;
   public float3? PreviousPosition;
 }
 
-[GenerateAuthoringComponent]
+[Serializable]
 public struct Hitbox : IComponentData {
   public HitboxFlags Flags;
   public float Radius;
@@ -53,7 +55,7 @@ public struct Hitbox : IComponentData {
   public void Unset(HitboxFlags flags) => Flags = Flags & ~flags;
 }
 
-[GenerateAuthoringComponent]
+[Serializable]
 public struct Hurtbox : IComponentData {
   public bool Enabled => Type != HurtboxType.INACTIVE;
 

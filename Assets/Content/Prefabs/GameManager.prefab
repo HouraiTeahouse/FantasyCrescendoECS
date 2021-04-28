@@ -1382,6 +1382,7 @@ GameObject:
   - component: {fileID: 7016787136043872881}
   - component: {fileID: 4834063384085046000}
   - component: {fileID: 1210465056120495723}
+  - component: {fileID: 5449857831491887689}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -1447,6 +1448,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _spawnPoints: Spawn Point
   _respawnPoints: Respawn
+  _matchActionMap: Match
   _config:
     StageID: 3709815314
     Stocks: 4
@@ -1533,6 +1535,20 @@ MonoBehaviour:
     y: 0
     width: 1
     height: 1
+--- !u!114 &5449857831491887689
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7016787136043872880}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ea7448df476a4858b258482547ebda1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Configs:
+  - {fileID: 11400000, guid: d3ddb5938f1c5ee4fa0c81d8e12b826c, type: 2}
 --- !u!1 &8279909197344960705
 GameObject:
   m_ObjectHideFlags: 0

@@ -5,6 +5,8 @@ using UnityEngine;
 using Unity.Assertions;
 using Unity.Entities;
 using Unity.Transforms;
+using UnityEngine.Animations;
+using UnityEngine.Playables;
 
 namespace HouraiTeahouse.FantasyCrescendo.Matches {
 
@@ -29,10 +31,8 @@ public enum TransitionCondition : uint {
 }
 
 public struct CharacterStateHitbox {
-  public bool Enabled;
-  public Translation Translation;
-  public Scale Scale;
   public Hitbox Hitbox;
+  public BlobArray<Translation> Positions;
 }
 
 public struct CharacterStateTransition {
@@ -44,9 +44,15 @@ public struct CharacterStateTransition {
 
 public struct CharacterState {
   public BlobString Name;
+  public AnimationClipPlayable Animation;
   public BlobArray<CharacterFrame> Frames;
   public BlobArray<CharacterStateHitbox> Hitboxes;
   public BlobArray<CharacterStateTransition> Transitions;
+}
+
+public class CharacterControllerBuildParams {
+  public PlayableGraph Graph;
+  public Dictionary<StateFrameData, int> StateMap;
 }
 
 public class StateFrameData : ScriptableObject {
@@ -60,13 +66,27 @@ public class StateFrameData : ScriptableObject {
 
     public CharacterStateTransition ToStateTransition(ref BlobBuilder builder,
                                                       Dictionary<StateFrameData, int> idMap) {
-      var transition = new CharacterStateTransition { 
+      var transition = new CharacterStateTransition {
         TargetStateID = idMap[Target],
         TargetFrame = this.TargetFrame,
         MinFrame = this.MinFrame,
       };
       builder.Construct(ref transition.Conditions, Conditions.ToArray());
       return transition;
+    }
+  }
+
+  public class HitboxData {
+    public bool Enabled;
+    public string BoundBone;
+    public Translation Offset;
+    public Hitbox Hitbox;
+    public Translation[] BakedPositions;
+
+    public CharacterStateHitbox ToStateHitbox(ref BlobBuilder builder) {
+      var stateHitbox = new CharacterStateHitbox { Hitbox = this.Hitbox };
+      builder.Construct(ref stateHitbox.Positions, BakedPositions.ToArray());
+      return stateHitbox;
     }
   }
 
@@ -77,7 +97,7 @@ public class StateFrameData : ScriptableObject {
     public bool Enabled;
     public FrameFlags Flags;
     public List<int> TogglePoints;
-    public List<CharacterStateHitbox> Hitboxes;
+    public List<HitboxData> Hitboxes;
 
     public void Apply(CharacterFrame[] frames, int hitboxOffset = 0) {
       if (!Enabled) return;
@@ -123,8 +143,10 @@ public class StateFrameData : ScriptableObject {
 #pragma warning disable 0649
   [SerializeField] string _name;
   [SerializeField] int _length;
-  [SerializeField] List<Track> _tracks;
   [SerializeField] List<Transition> _transitions;
+
+  public AnimationClip Animation;
+  public List<Track> Tracks;
 
   [SerializeField] AnimationCurve HorizontalMovement;
   [SerializeField] AnimationCurve VerticalMovement;
@@ -132,17 +154,19 @@ public class StateFrameData : ScriptableObject {
   [SerializeField] AnimationCurve KnockbackResistance;
 #pragma warning restore 0649
 
-  public CharacterState BuildState(ref BlobBuilder builder, 
-                                   Dictionary<StateFrameData, int> idMap) {
-    var state = new CharacterState();
+  public CharacterState BuildState(ref BlobBuilder builder,
+                                    CharacterControllerBuildParams builderParams) {
+    var state = new CharacterState {
+      Animation = AnimationClipPlayable.Create(builderParams.Graph, Animation)
+    };
     builder.AllocateString(ref state.Name, _name);
     builder.Construct(ref state.Frames, BuildFrames());
-    builder.Construct(ref state.Hitboxes, BuildHitboxes());
+    builder.Construct(ref state.Hitboxes, BuildHitboxes(ref builder));
 
     var transitions = new List<CharacterStateTransition>();
     foreach (var transition in _transitions) {
       if (!transition.Enabled) continue;
-      transitions.Add(transition.ToStateTransition(ref builder, idMap));
+      transitions.Add(transition.ToStateTransition(ref builder, builderParams.StateMap));
     }
     builder.Construct(ref state.Transitions, transitions.ToArray());
     return state;
@@ -151,7 +175,7 @@ public class StateFrameData : ScriptableObject {
   CharacterFrame[] BuildFrames() {
     var frames = new CharacterFrame[_length];
     var hitboxOffset = 0;
-    foreach (var track in _tracks) {
+    foreach (var track in Tracks) {
       if (!track.Enabled) continue;
       track?.Apply(frames, hitboxOffset);
       hitboxOffset += (track?.Enabled ?? false) ? track.Hitboxes.Count : 0;
@@ -167,13 +191,13 @@ public class StateFrameData : ScriptableObject {
     return frames;
   }
 
-  CharacterStateHitbox[] BuildHitboxes() {
+  CharacterStateHitbox[] BuildHitboxes(ref BlobBuilder builder) {
     var hitboxes = new List<CharacterStateHitbox>();
-    foreach (var track in _tracks) {
+    foreach (var track in Tracks) {
       if (!track.Enabled) continue;
       foreach (var hitbox in track.Hitboxes) {
         if (!hitbox.Enabled) continue;
-        hitboxes.Add(hitbox);
+        hitboxes.Add(hitbox.ToStateHitbox(ref builder));
         if (hitboxes.Count >= CharacterFrame.kMaxPlayerHitboxCount) {
           return hitboxes.ToArray();
         }

@@ -77,5 +77,15 @@ PrefabInstance:
       propertyPath: m_Name
       value: Debug_Character_4
       objectReference: {fileID: 0}
+    - target: {fileID: 4607947962192107211, guid: 1a966b5a1e7b757448aa1e5ba1b18ed6,
+        type: 3}
+      propertyPath: m_PrimitiveOrientation.Value.z
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 8553641101386462151, guid: 1a966b5a1e7b757448aa1e5ba1b18ed6,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 0aa38b6c7f90b104fa4b1cf3933ed1de, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1a966b5a1e7b757448aa1e5ba1b18ed6, type: 3}

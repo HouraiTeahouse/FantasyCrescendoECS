@@ -95,7 +95,7 @@ public class PlayerInputWatcher : MonoBehaviour {
 
     _buttons = new Dictionary<PlayerInput.Button, InputAction>();
     _buttons[PlayerInput.Button.ATTACK] = actions[_attackAction];
-    _buttons[PlayerInput.Button.SPECIAL] = actions[_shieldAction];
+    _buttons[PlayerInput.Button.SPECIAL] = actions[_specialAction];
     _buttons[PlayerInput.Button.JUMP] = actions[_jumpAction];
     _buttons[PlayerInput.Button.GRAB] = actions[_grabAction];
     _buttons[PlayerInput.Button.SHIELD] = actions[_shieldAction];
